@@ -1,9 +1,11 @@
 [gd_scene format=3 uid="uid://cov5y302u05b3"]
 
 [ext_resource type="Script" uid="uid://bvgirqmcvyb7y" path="res://start_menu.gd" id="1_ots34"]
+[ext_resource type="PackedScene" uid="uid://dmukdcbojkio5" path="res://main.tscn" id="2_qn1rc"]
 
 [node name="Main" type="Node2D" unique_id=1383165686]
 script = ExtResource("1_ots34")
+main_scene = ExtResource("2_qn1rc")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1374632228]
 
