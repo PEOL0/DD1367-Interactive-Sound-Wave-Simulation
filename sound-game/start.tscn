@@ -1,5 +1,33 @@
 [gd_scene format=3 uid="uid://cov5y302u05b3"]
 
+[ext_resource type="Script" uid="uid://bvgirqmcvyb7y" path="res://start_menu.gd" id="1_ots34"]
+
 [node name="Main" type="Node2D" unique_id=1383165686]
+script = ExtResource("1_ots34")
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1374632228]
+
+[node name="VBoxContainer" type="VBoxContainer" parent="." unique_id=872966911]
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -307.5
+offset_top = -193.5
+offset_right = 307.5
+offset_bottom = 193.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="VBoxContainer" unique_id=1995077309]
+layout_mode = 2
+text = "Start"
+
+[node name="Button2" type="Button" parent="VBoxContainer" unique_id=200748335]
+layout_mode = 2
+text = "Quit"
+
+[connection signal="pressed" from="VBoxContainer/Button" to="." method="start_game"]
+[connection signal="pressed" from="VBoxContainer/Button2" to="." method="quit_game"]
