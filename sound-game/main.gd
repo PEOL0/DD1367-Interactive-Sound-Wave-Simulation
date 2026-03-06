@@ -1,6 +1,7 @@
-extends Node2D
+extends Node
 
 @onready var shader_material: ShaderMaterial = $ColorRect.material
+@export var isMenu: bool
 
 const N := 100
 const TOTAL := N * N
@@ -89,11 +90,12 @@ func _inject_impulse(gx: int, gy: int, amplitude: float = 1.0):
 # Space injects an impulse at the grid centre
 # R resets both pressure buffers to zero.
 func _unhandled_input(event):
-	if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
-		_inject_impulse(N / 2, N / 2)
-		print("Ljud!")
+	if not isMenu:
+		if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
+			_inject_impulse(N / 2, N / 2)
+			print("Ljud!")
 
-	if event is InputEventKey and event.pressed and event.keycode == KEY_R:
-		p0.fill(0.0)
-		p1.fill(0.0)
-		print("Fält nollställt")
+		if event is InputEventKey and event.pressed and event.keycode == KEY_R:
+			p0.fill(0.0)
+			p1.fill(0.0)
+			print("Fält nollställt")
