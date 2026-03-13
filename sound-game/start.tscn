@@ -1,0 +1,54 @@
+[gd_scene format=3 uid="uid://cov5y302u05b3"]
+
+[ext_resource type="Script" uid="uid://bvgirqmcvyb7y" path="res://start_menu.gd" id="1_ots34"]
+[ext_resource type="PackedScene" uid="uid://dmukdcbojkio5" path="res://main.tscn" id="2_qn1rc"]
+[ext_resource type="Shader" uid="uid://b38pbiscekded" path="res://main.gdshader" id="3_1n0d2"]
+[ext_resource type="Script" uid="uid://bt17ah4qrcvf" path="res://main.gd" id="3_y5hus"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_y5hus"]
+shader = ExtResource("3_1n0d2")
+shader_parameter/gain = 5.0
+
+[node name="Main" type="Node2D" unique_id=1383165686 node_paths=PackedStringArray("background_script")]
+script = ExtResource("1_ots34")
+main_scene = ExtResource("2_qn1rc")
+background_script = NodePath("Node")
+
+[node name="Camera2D" type="Camera2D" parent="." unique_id=1374632228]
+
+[node name="Node" type="Node" parent="." unique_id=108236581]
+script = ExtResource("3_y5hus")
+isMenu = true
+
+[node name="ColorRect" type="ColorRect" parent="Node" unique_id=87161436]
+material = SubResource("ShaderMaterial_y5hus")
+offset_left = -800.0
+offset_top = -450.0
+offset_right = 800.0
+offset_bottom = 450.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Node/ColorRect" unique_id=872966911]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -307.5
+offset_top = -193.5
+offset_right = 307.5
+offset_bottom = 193.5
+grow_horizontal = 2
+grow_vertical = 2
+alignment = 1
+
+[node name="Button" type="Button" parent="Node/ColorRect/VBoxContainer" unique_id=1995077309]
+layout_mode = 2
+text = "Start"
+
+[node name="Button2" type="Button" parent="Node/ColorRect/VBoxContainer" unique_id=200748335]
+layout_mode = 2
+text = "Quit"
+
+[connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button" to="." method="start_game"]
+[connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button2" to="." method="quit_game"]
