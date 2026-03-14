@@ -70,6 +70,14 @@ func get_shape_under_mouse(mouse_pos: Vector2) -> Polygon2D:
 
 # Turns the drawn line into a solid object
 func create_polygon(points: PackedVector2Array) -> void:
+	if points.size() < 3:
+		return
+
+	var triangulation := Geometry2D.triangulate_polygon(points)
+	if triangulation.is_empty():
+		push_warning("Invalid polygon data, triangulation failed in create_polygon")
+		return
+
 	var poly = Polygon2D.new()
 	poly.polygon = points
 	# Give it a random pastel color so you can tell them apart!
