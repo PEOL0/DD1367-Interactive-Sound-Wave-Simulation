@@ -1,5 +1,7 @@
 extends Node2D
 
+signal geometry_changed
+
 var current_drawing: PackedVector2Array = []
 var is_drawing: bool = false
 
@@ -8,9 +10,7 @@ var drag_offset: Vector2 = Vector2.ZERO
 
 var colors: Array[Color] = [Color("e83d84"), Color("e79775"), Color("8ec4cb"), Color("c44599"), Color("b4f5a2"), Color("5ee08a"), Color("c996ed"), Color("ffcc74")]
 
-
 func _unhandled_input(event: InputEvent) -> void:
-	print("We got an unhandled input")
 	# Handle Mouse Button Clicks
 	if event is InputEventMouseButton and event.button_index == 1:
 		print("Vänster mouse klick")
@@ -42,6 +42,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					create_polygon(current_drawing)
 				current_drawing.clear()
 			if dragged_shape:
+				emit_signal("geometry_changed")
 				dragged_shape = null 
 
 	# Handle Mouse Movement
@@ -74,6 +75,17 @@ func create_polygon(points: PackedVector2Array) -> void:
 	# Give it a random pastel color so you can tell them apart!
 	poly.color = colors.get(randi_range(0,colors.size()-1))
 	self.add_child(poly)
+	emit_signal("geometry_changed")
+
+func clear_shapes():
+	for child in get_children():
+		if child is Polygon2D:
+			child.queue_free()
+	current_drawing.clear()
+	is_drawing = false
+	dragged_shape = null
+	queue_redraw()
+	emit_signal("geometry_changed")
 
 func _draw():
 	if current_drawing.size() > 5:
