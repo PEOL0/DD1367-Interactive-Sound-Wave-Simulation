@@ -1,7 +1,8 @@
 [gd_scene format=3 uid="uid://dmukdcbojkio5"]
 
-[ext_resource type="Script" path="res://main.gd" id="1_0xm2m"]
-[ext_resource type="Shader" path="res://main.gdshader" id="2_h2yge"]
+[ext_resource type="Script" uid="uid://bt17ah4qrcvf" path="res://main.gd" id="1_0xm2m"]
+[ext_resource type="Shader" uid="uid://b38pbiscekded" path="res://main.gdshader" id="2_h2yge"]
+[ext_resource type="PackedScene" uid="uid://stmeifteh57g" path="res://speaker.tscn" id="3_h2yge"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1bvp3"]
 shader = ExtResource("2_h2yge")
@@ -18,3 +19,5 @@ offset_right = 800.0
 offset_bottom = 450.0
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1639537310]
+
+[node name="Speaker" parent="." unique_id=1521691004 instance=ExtResource("3_h2yge")]
