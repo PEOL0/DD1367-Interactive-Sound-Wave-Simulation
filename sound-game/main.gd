@@ -80,7 +80,15 @@ func _ready():
 
 	print("Simulation ready – grid %d×%d  c=%.1f  dt=%.6f  CFL r=%.4f" % [
 		N[0], N[1], c_speed, dt, c_speed * dt / dx])
+	
+	change_rect()
 
+func change_rect():
+	var screen_size_x = get_viewport().get_visible_rect().size.x
+	var scale = screen_size_x / 800
+	
+	$ColorRect.scale = Vector2(scale, scale)
+	$ColorRect.position = Vector2(-(screen_size_x/2), -(($ColorRect.size.y*scale)/2))
 
 # Runs every physics frame: sends work to the GPU to advance the sound simulation one time step
 func _physics_process(_delta):
