@@ -11,9 +11,13 @@ config_version=5
 [application]
 
 config/name="Sound Game"
-run/main_scene="uid://cov5y302u05b3"
+run/main_scene="uid://dperjrjj4rehn"
 config/features=PackedStringArray("4.6", "Forward Plus")
 config/icon="res://icon.svg"
+
+[display]
+
+window/size/mode=2
 
 [physics]
 

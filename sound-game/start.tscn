@@ -1,4 +1,4 @@
-[gd_scene format=3 uid="uid://cov5y302u05b3"]
+[gd_scene format=3 uid="uid://dperjrjj4rehn"]
 
 [ext_resource type="Script" uid="uid://bvgirqmcvyb7y" path="res://start_menu.gd" id="1_ots34"]
 [ext_resource type="PackedScene" uid="uid://dmukdcbojkio5" path="res://main.tscn" id="2_qn1rc"]
@@ -13,8 +13,6 @@ shader_parameter/gain = 5.0
 script = ExtResource("1_ots34")
 main_scene = ExtResource("2_qn1rc")
 background_script = NodePath("Node")
-
-[node name="Camera2D" type="Camera2D" parent="." unique_id=1374632228]
 
 [node name="Node" type="Node" parent="." unique_id=108236581]
 script = ExtResource("3_y5hus")
@@ -49,6 +47,9 @@ text = "Start"
 [node name="Button2" type="Button" parent="Node/ColorRect/VBoxContainer" unique_id=200748335]
 layout_mode = 2
 text = "Quit"
+
+[node name="Camera2D" type="Camera2D" parent="Node" unique_id=1374632228]
+zoom = Vector2(0.72, 0.72)
 
 [connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button" to="." method="start_game"]
 [connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button2" to="." method="quit_game"]
