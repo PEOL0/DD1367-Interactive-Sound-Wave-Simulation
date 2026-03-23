@@ -18,3 +18,4 @@ offset_right = 800.0
 offset_bottom = 450.0
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1639537310]
+zoom = Vector2(0.72, 0.72)

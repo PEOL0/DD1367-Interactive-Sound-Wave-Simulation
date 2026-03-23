@@ -16,5 +16,5 @@ void fragment() {
     float intensity = clamp(abs(scaled), 0.0, 1.0);
     vec3 color = (scaled >= 0.0) ? pos_color * intensity : neg_color * intensity;
 
-    COLOR = vec4(color, 1.0);
+    COLOR = vec4(color, intensity);
 }
