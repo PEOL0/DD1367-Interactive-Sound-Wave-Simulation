@@ -159,6 +159,7 @@ func clear_shapes():
 	is_drawing = false
 	dragged_shape = null
 	queue_redraw()
+	print("test")
 	emit_signal("geometry_changed")
 
 func _draw():
