@@ -4,6 +4,7 @@ signal geometry_changed
 
 var current_drawing: PackedVector2Array = []
 var is_drawing: bool = false
+var HUD: HBoxContainer
 
 var dragged_shape: Polygon2D = null
 var drag_offset: Vector2 = Vector2.ZERO
@@ -11,6 +12,7 @@ var drag_offset: Vector2 = Vector2.ZERO
 var colors: Array[Color] = [Color("e83d84"), Color("e79775"), Color("8ec4cb"), Color("c44599"), Color("b4f5a2"), Color("5ee08a"), Color("c996ed"), Color("ffcc74")]
 
 func _unhandled_input(event: InputEvent) -> void:
+	
 	# Handle Mouse Button Clicks
 	if event is InputEventMouseButton and event.button_index == 1:
 		print("Vänster mouse klick")
@@ -26,7 +28,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				print("Clicked shape")
 				dragged_shape = clicked_shape
 				drag_offset = dragged_shape.position - world_mouse_pos
-			else:
+			elif HUD.penSelected:
 				print("Ritar")
 				# 2. Start drawing a new shape
 				is_drawing = true
