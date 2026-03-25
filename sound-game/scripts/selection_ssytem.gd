@@ -25,25 +25,25 @@ func _ready() -> void:
 	
 
 
-# 🔘 PEN
+
 func pen_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.PEN
 
 
-# 🔲 SQUARE
+
 func square_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.SQUARE
 
 
-# 🔺 TRIANGLE
+
 func triangle_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.TRIANGLE
 
 
-# 🧱 L-SHAPE
+
 func l_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.L
