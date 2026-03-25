@@ -72,6 +72,6 @@ theme_override_styles/pressed = SubResource("StyleBoxFlat_272bh")
 icon = ExtResource("3_h2yge")
 
 [connection signal="toggled" from="HBoxContainer/Button" to="HBoxContainer" method="pen_selection"]
-[connection signal="pressed" from="HBoxContainer/Button2" to="HBoxContainer" method="non_pen_pressed"]
-[connection signal="pressed" from="HBoxContainer/Button3" to="HBoxContainer" method="non_pen_pressed"]
-[connection signal="pressed" from="HBoxContainer/Button4" to="HBoxContainer" method="non_pen_pressed"]
+[connection signal="button_down" from="HBoxContainer/Button2" to="HBoxContainer" method="non_pen_pressed"]
+[connection signal="button_down" from="HBoxContainer/Button3" to="HBoxContainer" method="non_pen_pressed"]
+[connection signal="button_down" from="HBoxContainer/Button4" to="HBoxContainer" method="non_pen_pressed"]
