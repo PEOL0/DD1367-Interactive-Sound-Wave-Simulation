@@ -5,10 +5,6 @@
 [ext_resource type="Script" uid="uid://noqswce30spm" path="res://scripts/selection_ssytem.gd" id="3_1bvp3"]
 [ext_resource type="Texture2D" uid="uid://cmv8ajxwakuhh" path="res://drawings/Pen.png" id="3_h2yge"]
 [ext_resource type="ButtonGroup" uid="uid://cfy3qvi1p7sks" path="res://scripts/button_group.tres" id="4_lquwl"]
-[ext_resource type="Texture2D" uid="uid://llk378p0h66j" path="res://drawings/Square.png" id="6_5vw27"]
-[ext_resource type="Texture2D" uid="uid://byb3ngrlietj1" path="res://drawings/Trash.png" id="6_7mycd"]
-[ext_resource type="Texture2D" uid="uid://buy1mf67l0wus" path="res://drawings/L-Shape.png" id="7_5vw27"]
-[ext_resource type="Texture2D" uid="uid://f8vyqg7rnse2" path="res://drawings/Triangle.png" id="7_kek77"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1bvp3"]
 shader = ExtResource("2_h2yge")
@@ -54,7 +50,7 @@ offset_right = -278.585
 offset_bottom = -322.48
 theme_override_styles/panel = SubResource("StyleBoxFlat_5vw27")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=354568315 node_paths=PackedStringArray("penButton", "squareButton", "triangleButton", "lButton", "clearButton")]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=354568315 node_paths=PackedStringArray("penButton", "squareButton", "lButton")]
 layout_mode = 0
 offset_left = 12.755
 offset_top = 12.275
@@ -66,9 +62,7 @@ theme_override_constants/separation = 256
 script = ExtResource("3_1bvp3")
 penButton = NodePath("Button")
 squareButton = NodePath("square")
-triangleButton = NodePath("triangle")
 lButton = NodePath("L-shape")
-clearButton = NodePath("clear")
 
 [node name="Button" type="Button" parent="Panel/HBoxContainer" unique_id=1910227871]
 layout_mode = 2
@@ -108,7 +102,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_kek77")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lquwl")
 toggle_mode = true
 button_group = ExtResource("4_lquwl")
-icon = ExtResource("6_5vw27")
+icon = ExtResource("3_h2yge")
 
 [node name="triangle" type="Button" parent="Panel/HBoxContainer" unique_id=1082738440]
 layout_mode = 2
@@ -116,7 +110,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_kek77")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lquwl")
 toggle_mode = true
 button_group = ExtResource("4_lquwl")
-icon = ExtResource("7_kek77")
+icon = ExtResource("3_h2yge")
 
 [node name="L-shape" type="Button" parent="Panel/HBoxContainer" unique_id=1592240651]
 layout_mode = 2
@@ -124,15 +118,7 @@ theme_override_styles/normal = SubResource("StyleBoxFlat_kek77")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lquwl")
 toggle_mode = true
 button_group = ExtResource("4_lquwl")
-icon = ExtResource("7_5vw27")
-
-[node name="clear" type="Button" parent="Panel/HBoxContainer" unique_id=566726634]
-layout_mode = 2
-theme_override_styles/normal = SubResource("StyleBoxFlat_kek77")
-theme_override_styles/pressed = SubResource("StyleBoxFlat_lquwl")
-toggle_mode = true
-button_group = ExtResource("4_lquwl")
-icon = ExtResource("6_7mycd")
+icon = ExtResource("3_h2yge")
 
 [connection signal="toggled" from="Panel/HBoxContainer/Button" to="Panel/HBoxContainer" method="pen_selection"]
 [connection signal="button_down" from="Panel/HBoxContainer/Button2" to="Panel/HBoxContainer" method="non_pen_pressed"]
@@ -141,4 +127,3 @@ icon = ExtResource("6_7mycd")
 [connection signal="toggled" from="Panel/HBoxContainer/square" to="Panel/HBoxContainer" method="square_selection"]
 [connection signal="toggled" from="Panel/HBoxContainer/triangle" to="Panel/HBoxContainer" method="triangle_selection"]
 [connection signal="toggled" from="Panel/HBoxContainer/L-shape" to="Panel/HBoxContainer" method="l_selection"]
-[connection signal="toggled" from="Panel/HBoxContainer/clear" to="Panel/HBoxContainer" method="clear_selection"]
