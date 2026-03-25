@@ -10,7 +10,7 @@ shader = ExtResource("2_h2yge")
 shader_parameter/gain = 5.0
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1bvp3"]
-bg_color = Color(0, 0, 0, 0.18431373)
+bg_color = Color(0, 0, 0, 0)
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_lquwl"]
 bg_color = Color(1, 1, 1, 0.72156864)
@@ -36,13 +36,12 @@ zoom = Vector2(0.72, 0.72)
 
 [node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=354568315 node_paths=PackedStringArray("penButton")]
 offset_left = -764.0
-offset_top = -417.0
-offset_right = 560.0
-offset_bottom = -89.0
+offset_top = -418.0
+offset_right = 1284.0
+offset_bottom = -90.0
 scale = Vector2(0.225, 0.225)
 size_flags_horizontal = 0
 theme_override_constants/separation = 256
-alignment = 1
 script = ExtResource("3_1bvp3")
 penButton = NodePath("Button")
 
