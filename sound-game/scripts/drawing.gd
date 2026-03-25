@@ -88,7 +88,7 @@ func create_polygon(points: PackedVector2Array) -> void:
 func clear_shapes():
 	for child in get_children():
 		if child is Polygon2D:
-			child.queue_free()
+			child.free()
 	current_drawing.clear()
 	is_drawing = false
 	dragged_shape = null
