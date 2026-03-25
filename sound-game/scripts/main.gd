@@ -2,7 +2,7 @@ extends Node
 
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
-@onready var HUD: HBoxContainer = $HBoxContainer
+@onready var HUD: HBoxContainer = $Panel/HBoxContainer
 
 const N := [1600, 900]
 const TOTAL := N[0] * N[1]

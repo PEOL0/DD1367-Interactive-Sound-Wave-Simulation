@@ -9,6 +9,14 @@
 shader = ExtResource("2_h2yge")
 shader_parameter/gain = 5.0
 
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_5vw27"]
+bg_color = Color(0.6, 0.6, 0.6, 0)
+border_width_left = 6
+border_width_top = 6
+border_width_right = 6
+border_width_bottom = 6
+border_color = Color(0, 0, 0, 1)
+
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_1bvp3"]
 bg_color = Color(0, 0, 0, 0)
 
@@ -34,43 +42,51 @@ offset_bottom = 450.0
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1639537310]
 zoom = Vector2(0.72, 0.72)
 
-[node name="HBoxContainer" type="HBoxContainer" parent="." unique_id=354568315 node_paths=PackedStringArray("penButton")]
+[node name="Panel" type="Panel" parent="." unique_id=1052459994]
 offset_left = -764.0
 offset_top = -418.0
-offset_right = 1284.0
-offset_bottom = -90.0
+offset_right = -278.585
+offset_bottom = -322.48
+theme_override_styles/panel = SubResource("StyleBoxFlat_5vw27")
+
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=354568315 node_paths=PackedStringArray("penButton")]
+layout_mode = 0
+offset_left = 12.755
+offset_top = 12.275
+offset_right = 2060.755
+offset_bottom = 340.275
 scale = Vector2(0.225, 0.225)
 size_flags_horizontal = 0
 theme_override_constants/separation = 256
 script = ExtResource("3_1bvp3")
 penButton = NodePath("Button")
 
-[node name="Button" type="Button" parent="HBoxContainer" unique_id=1910227871]
+[node name="Button" type="Button" parent="Panel/HBoxContainer" unique_id=1910227871]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_1bvp3")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lquwl")
 toggle_mode = true
 icon = ExtResource("3_h2yge")
 
-[node name="Button2" type="Button" parent="HBoxContainer" unique_id=1589013057]
+[node name="Button2" type="Button" parent="Panel/HBoxContainer" unique_id=1589013057]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_7mycd")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_272bh")
 icon = ExtResource("3_h2yge")
 
-[node name="Button3" type="Button" parent="HBoxContainer" unique_id=1802039271]
+[node name="Button3" type="Button" parent="Panel/HBoxContainer" unique_id=1802039271]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_7mycd")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_272bh")
 icon = ExtResource("3_h2yge")
 
-[node name="Button4" type="Button" parent="HBoxContainer" unique_id=1081151086]
+[node name="Button4" type="Button" parent="Panel/HBoxContainer" unique_id=1081151086]
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_7mycd")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_272bh")
 icon = ExtResource("3_h2yge")
 
-[connection signal="toggled" from="HBoxContainer/Button" to="HBoxContainer" method="pen_selection"]
-[connection signal="button_down" from="HBoxContainer/Button2" to="HBoxContainer" method="non_pen_pressed"]
-[connection signal="button_down" from="HBoxContainer/Button3" to="HBoxContainer" method="non_pen_pressed"]
-[connection signal="button_down" from="HBoxContainer/Button4" to="HBoxContainer" method="non_pen_pressed"]
+[connection signal="toggled" from="Panel/HBoxContainer/Button" to="Panel/HBoxContainer" method="pen_selection"]
+[connection signal="button_down" from="Panel/HBoxContainer/Button2" to="Panel/HBoxContainer" method="non_pen_pressed"]
+[connection signal="button_down" from="Panel/HBoxContainer/Button3" to="Panel/HBoxContainer" method="non_pen_pressed"]
+[connection signal="button_down" from="Panel/HBoxContainer/Button4" to="Panel/HBoxContainer" method="non_pen_pressed"]
