@@ -154,7 +154,7 @@ func create_l_shape(center: Vector2, size: float = 60.0) -> void:
 func clear_shapes():
 	for child in get_children():
 		if child is Polygon2D:
-			child.queue_free()
+			child.free()
 	current_drawing.clear()
 	is_drawing = false
 	dragged_shape = null
