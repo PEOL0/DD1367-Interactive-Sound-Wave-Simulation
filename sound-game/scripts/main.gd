@@ -2,6 +2,7 @@ extends Node
 
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
+@onready var HUD: HBoxContainer = $Panel/HBoxContainer
 
 const N := [1600, 900]
 const TOTAL := N[0] * N[1]
@@ -130,11 +131,13 @@ func _spawn_drawing_layer():
 	drawing_layer.name = "DrawingLayer"
 	drawing_layer.set_script(DRAWING_SCRIPT)
 	add_child(drawing_layer)
+	drawing_layer.HUD = HUD
 	if drawing_layer.has_signal("geometry_changed"):
 		drawing_layer.connect("geometry_changed", Callable(self, "_on_geometry_changed"))
 
 #Sets the obstacle_dirty flag to true to rebuild the obstacle mask. Typicly only run on geometry_changed signal
 func _on_geometry_changed():
+	print("got here")
 	obstacle_dirty = true
 
 #Builds the obstacle mask and clears the obstacle_diry flag.
