@@ -16,9 +16,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Handle Mouse Button Clicks
 	if event is InputEventMouseButton and event.button_index == 1:
 		print("Vänster mouse klick")
+		
 		if event.pressed:
 			print("Pressas")
-			# Get the exact world position instead of the screen position
+			
 			var world_mouse_pos = get_global_mouse_position()
 			
 			# 1. Check if we clicked an existing shape first
@@ -28,21 +29,44 @@ func _unhandled_input(event: InputEvent) -> void:
 				print("Clicked shape")
 				dragged_shape = clicked_shape
 				drag_offset = dragged_shape.position - world_mouse_pos
-			elif HUD.penSelected:
-				print("Ritar")
-				# 2. Start drawing a new shape
-				is_drawing = true
-				current_drawing.clear()
-				current_drawing.append(world_mouse_pos)
+			
+			else:
+				# 2. Create shape depending on tool
+				match HUD.current_tool:
+					
+					HUD.Tool.TRIANGLE:
+						print("Skapar triangle")
+						create_triangle(world_mouse_pos)
+					
+					HUD.Tool.L:
+						print("Skapar L")
+						create_l_shape(world_mouse_pos)
+					
+					HUD.Tool.SQUARE:
+						print("Skapar kvadrat")
+						create_square(world_mouse_pos)
+					
+					HUD.Tool.PEN:
+						print("Ritar")
+						is_drawing = true
+						current_drawing.clear()
+						current_drawing.append(world_mouse_pos)
+						
+					HUD.Tool.DELETE:
+						print("clearar")
+						clear_shapes()
 		
 		else:
-			# Mouse Released (Keep this exactly the same as before)
+			# Mouse Released
 			if is_drawing:
 				is_drawing = false
 				queue_redraw()
+				
 				if current_drawing.size() > 2:
 					create_polygon(current_drawing)
+				
 				current_drawing.clear()
+			
 			if dragged_shape:
 				emit_signal("geometry_changed")
 				dragged_shape = null 
@@ -50,12 +74,13 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Handle Mouse Movement
 	elif event is InputEventMouseMotion:
 		var world_mouse_pos = get_global_mouse_position()
+		
 		if is_drawing:
 			current_drawing.append(world_mouse_pos)
 			queue_redraw()
+		
 		elif dragged_shape:
 			dragged_shape.position = world_mouse_pos + drag_offset
-
 
 # This function checks if the mouse position is inside any of our drawn shapes
 func get_shape_under_mouse(mouse_pos: Vector2) -> Polygon2D:
@@ -87,14 +112,54 @@ func create_polygon(points: PackedVector2Array) -> void:
 	self.add_child(poly)
 	emit_signal("geometry_changed")
 
+func create_square(center: Vector2, size: float = 50.0) -> void:
+	var half = size / 2
+	
+	var points = PackedVector2Array([
+		center + Vector2(-half, -half),
+		center + Vector2(half, -half),
+		center + Vector2(half, half),
+		center + Vector2(-half, half)
+	])
+	
+	create_polygon(points)
+
+func create_triangle(center: Vector2, size: float = 60.0) -> void:
+	var half = size / 2
+	
+	var points = PackedVector2Array([
+		center + Vector2(0, -half),      # topp
+		center + Vector2(-half, half),   # vänster
+		center + Vector2(half, half)     # höger
+	])
+	
+	create_polygon(points)
+
+func create_l_shape(center: Vector2, size: float = 60.0) -> void:
+	var half = size / 2
+	
+	var points = PackedVector2Array([
+		center + Vector2(-half, -half),
+		center + Vector2(-half/2, -half),
+		center + Vector2(-half/2, half/2),
+		center + Vector2(half, half/2),
+		center + Vector2(half, half),
+		center + Vector2(-half, half),
+		center + Vector2(-half, -half)
+	])
+	
+	create_polygon(points)
+
+
 func clear_shapes():
 	for child in get_children():
 		if child is Polygon2D:
-			child.queue_free()
+			child.free()
 	current_drawing.clear()
 	is_drawing = false
 	dragged_shape = null
 	queue_redraw()
+	print("test")
 	emit_signal("geometry_changed")
 
 func _draw():

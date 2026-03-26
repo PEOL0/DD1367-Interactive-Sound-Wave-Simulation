@@ -137,6 +137,7 @@ func _spawn_drawing_layer():
 
 #Sets the obstacle_dirty flag to true to rebuild the obstacle mask. Typicly only run on geometry_changed signal
 func _on_geometry_changed():
+	print("got here")
 	obstacle_dirty = true
 
 #Builds the obstacle mask and clears the obstacle_diry flag.
