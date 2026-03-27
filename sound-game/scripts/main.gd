@@ -3,6 +3,7 @@ extends Node
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
 @onready var HUD: HBoxContainer = $Panel/HBoxContainer
+@onready var speaker: Node2D = $Speaker
 
 const N := [1600, 900]
 const TOTAL := N[0] * N[1]
@@ -89,6 +90,9 @@ func change_rect():
 	var scale = screen_size_x / $ColorRect.size.x
 	print(scale)
 	$Camera2D.zoom = Vector2(scale, scale)
+
+func get_grid_size() -> Vector2i:
+	return Vector2i(N[0], N[1])
 
 # Runs every physics frame: sends work to the GPU to advance the sound simulation one time step
 func _physics_process(_delta):
@@ -224,7 +228,10 @@ func _inject_impulse(gx: int, gy: int, amplitude: float = 1.0):
 func _unhandled_input(event):
 	if not isMenu:
 		if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
-			_inject_impulse(N[0] / 2, N[1] / 2)
+			if speaker and speaker.has_method("emit_sound"):
+				speaker.emit_sound()
+			else:
+				push_error("Missing speaker (!!!!!?)")
 			print("Sound")
 
 		if event is InputEventKey and event.pressed and event.keycode == KEY_R:
