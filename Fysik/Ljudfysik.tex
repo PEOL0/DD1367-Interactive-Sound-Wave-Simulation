@@ -25,6 +25,10 @@
 \usepackage{listings}
 \usepackage{xcolor}
 
+% --- images ---
+\usepackage{graphicx}
+\graphicspath{{images/}}
+
 \lstdefinestyle{pseudocode}{
   basicstyle=\ttfamily\small,
   columns=fullflexible,
@@ -40,11 +44,11 @@
 \vspace{3cm}
 \Huge \textbf{Fysikalisk Modell för 2D-Simulering av Ljud} \\
 \vspace{0.5cm}
-\Large Piano-baserad interaktiv installation för Tom Tits
+\Large Interaktiv installation för Tom Tits
 }
 
 \author{Leo Ehrenberg}
-\date{16/02/26}
+\date{15/03/26}
 
 \begin{document}
 
@@ -62,20 +66,11 @@ simulera ljudutbredning i ett tvådimensionellt plan. Modellen är framtagen
 för en interaktiv installation där barn visuellt kan observera hur ljud
 sprids, reflekteras och interagerar med olika material.
 
-Systemet bygger på linjär akustik och representerar det aktuella tryckfältet
+Systemet bygger på linjär akustik (vilket innebär att tryckvariationerna antas vara små
+jämfört med atmosfärstrycket) och representerar det aktuella tryckfältet
 $p(x,y,t)$ i varje punkt i planet. Samtliga använda formler är direkt
 förankrade i etablerad vågteori och akustik.
 
-Dokumentet innehåller:
-\begin{itemize}
-\item Fysikalisk teori
-\item Matematiska funktionsdefinitioner
-\item Numerisk implementering (pseudokod)
-\item Material- och pianomodell
-\end{itemize}
-
-Syftet är att säkerställa både pedagogisk tydlighet och
-vetenskaplig korrekthet.
 \end{minipage}
 \end{center}
 
@@ -84,7 +79,6 @@ vetenskaplig korrekthet.
 \tableofcontents
 
 \newpage
-
 
 \section{Symbolförklaring}
 Denna lista beskriver alla symboler som används i formlerna i dokumentet.
@@ -96,35 +90,23 @@ Denna lista beskriver alla symboler som används i formlerna i dokumentet.
   \item $T$ = period (s)
   \item $\omega$ = vinkelhastighet (rad/s)
   \item $k$ = vågtal (rad/m)
-  \item $v$ eller $c$ = ljudhastighet (m/s)
+  \item $c$ = våghastighet; ljudhastighet (m/s)
 \end{itemize}
 
 \subsection*{Rum och tid}
 \begin{itemize}[leftmargin=*,nosep]
   \item $x,y$ = position i planet (m)
   \item $t$ = tid (s)
-  \item $r$ = avstånd (m)
+  \item $d$ = avstånd (m)
 \end{itemize}
 
-\subsection*{Akustiska storheter}
+\subsection*{Medium}
 \begin{itemize}[leftmargin=*,nosep]
   \item $p$ = akustisk tryckavvikelse (Pa)
   \item $p_0$ = atmosfärstryck (Pa)
-  \item $p_{\text{rms}}$ = effektivt (RMS) ljudtryck (Pa)
-  \item $I$ = intensitet (W/m$^2$)
-\end{itemize}
-
-\subsection*{Materialparametrar}
-\begin{itemize}[leftmargin=*,nosep]
   \item $\rho$ = densitet (kg/m$^3$)
-  \item $c$ = ljudhastighet i medium (m/s)
-  \item $K$ = bulkmodul (Pa)
   \item $Z$ = akustisk impedans
   \item $\alpha$ = absorptionskoefficient (modellparameter)
-\end{itemize}
-
-\subsection*{Reflektion och transmission}
-\begin{itemize}[leftmargin=*,nosep]
   \item $R$ = reflektionskoefficient (amplitud)
   \item $T$ = transmissionskoefficient (amplitud)
 \end{itemize}
@@ -132,67 +114,82 @@ Denna lista beskriver alla symboler som används i formlerna i dokumentet.
 \subsection*{Piano}
 \begin{itemize}[leftmargin=*,nosep]
   \item $n$ = halvtonssteg från A4
-  \item $L$ = stränglängd
-  \item $T$ = strängspänning (notera: samma symbol som period, men i olika sammanhang)
-  \item $\mu$ = massa per längdenhet
   \item $A_n$ = amplitud för harmonisk komponent
-  \item $\tau$ = avklingningstid
   \item $\phi_n$ = fas för harmonisk komponent
 \end{itemize}
 
 
+\clearpage
+\section{Fysiska konstanter och modellparametrar}
+
+Tabellen nedan sammanfattar de fysikaliska parametrar som används
+för olika medium i simuleringen. Dessa parametrar bestämmer hur
+ljudvågor sprids, dämpas och reflekteras i varje punkt i planet.
+
+\begin{center}
+\begin{tabular}{lllll}
+\hline
+Medium & $c$ (m/s) & $\rho$ (kg/m$^3$) & $\alpha$ (m$^{-1}$) & $\beta$ \\
+\hline
+
+Luft (20°C) & 343 & 1.21 & 0.01 & 0.999 \\
+
+Vatten & 1480 & 1000 & 0.002 & 0.9995 \\
+
+Trä & 3300 & 600 & 0.05 & 0.995 \\
+
+Betong & 3200 & 2400 & 0.02 & 0.997 \\
+
+Stål & 5960 & 7850 & 0.005 & 0.999 \\
+
+\hline
+\end{tabular}
+\end{center}
+
+Här är \quad $c$ ljudhastigheten i materialet, \quad $\rho$ 
+materialets densitet, \quad $\alpha$ absorptionskoefficient 
+i den kontinuerliga modellen, \quad $\beta$ dämpningsfaktor 
+per tidssteg i den diskreta simuleringen.
+I simuleringen definieras ett bakgrundsmedium som fyller hela
+domänen. När objekt placeras i simuleringen ersätter deras
+materialparametrar de lokala värdena i de gridceller som objektet
+täcker.
+
+
 \section{Grundläggande vågrelationer}
 \begin{align}
-v &= f\lambda \\
+c &= f\lambda \\
 T &= \frac{1}{f} \\
 k &= \frac{2\pi}{\lambda} \\
 \omega &= 2\pi f
 \end{align}
 
-Funktion:
-\[
-\lambda(f,c) = \frac{c}{f}
-\]
-\[
-T(f) = \frac{1}{f}
-\]
-\[
-k(\lambda) = \frac{2\pi}{\lambda}
-\]
-\[
-\omega(f) = 2\pi f
-\]
 
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function wavelength(f, c):
-  assert f > 0
-  return c / f
-\end{lstlisting}
-\begin{lstlisting}[style=pseudocode]
-function wavenumber(lambda):
-  assert lambda > 0
-  return 2*pi / lambda
-\end{lstlisting}
-\begin{lstlisting}[style=pseudocode]
-function angular_frequency(f):
-  return 2*pi*f
-\end{lstlisting}
-\begin{lstlisting}[style=pseudocode]
-function period(f):
-  assert f > 0
-  return 1 / f
-\end{lstlisting}
-
-\section{Ljud som tryckvåg}
+\section{Implementation för projektet - Ljud som tryckvåg}
 \begin{equation}
 p_{\text{tot}}(x,y,t) = p_0 + p(x,y,t)
 \end{equation}
-I simuleringen arbetar vi med $p(x,y,t)$, dvs. tryckavvikelsen från atmosfärstrycket $p_0$.
+
+I simuleringen arbetar vi med $p(x,y,t)$, dvs. 
+tryckavvikelsen från atmosfärstrycket $p_0$. Som visas i 
+Figur \ref{fig:ljud} sprids ljudvågor radiellt från källan.
+Det är detta tryckfält som i nästa sektion modelleras med
+den tvådimensionella vågekvationen.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.7\textwidth]{ljud.png}
+\caption{Visualisering av ljudvågor i två dimensioner.}
+\label{fig:ljud}
+\end{figure}
+
 
 \clearpage
 \section{2D-vågekvationen (huvudlagen)}
-För ett homogent medium beskrivs ljudutbredning i ett 2D-plan av:
+Utgångspunkten för modellen är vågekvationen, som beskriver hur akustiska 
+tryckvågor sprids i ett homogent medium. För ett homogent medium beskrivs 
+ljudutbredning i ett 2D-plan av:
+
 \begin{equation}
 \frac{\partial^2 p}{\partial t^2}
 =
@@ -203,365 +200,89 @@ c^2\left(
 \right)
 \end{equation}
 
-Funktion:
+Vågekvationen beskriver hur tryckfältets tidsutveckling
+bestäms av dess rumsliga variation. Krökning i tryckfältet
+genererar därmed acceleration i tiden, vilket ger upphov
+till vågutbredning.
+
+
+\subsection{Diskretisering av vågekvationen}
+För att kunna simulera vågekvationen på en dator måste den kontinuerliga
+ekvationen diskretiseras. Detta innebär att rummet delas upp i ett
+regelbundet rutnät och tiden utvecklas i diskreta steg.
+
+Vi introducerar därför följande diskreta variabler:
+
 \[
-\mathcal{W}[p] =
+p_{i,j}^n \approx p(x_i, y_j, t_n)
+\]
+
+där $x_i = i \Delta x, \quad y_j = j \Delta x, \quad t_n = n \Delta t$. 
+$\Delta x$ är den spatiala gridstorleken, $\Delta t$ tidssteget, 
+$i,j$ gridindex i rummet och $n$ tidsindex.
+Tryckfältet representeras alltså numeriskt som ett tvådimensionellt
+fält där varje punkt uppdateras vid varje tidssteg. De partiella 
+derivatorna i vågekvationen approximeras med centrala differenser.
+
+Den andra derivatan i tiden approximeras som
+
+\[
 \frac{\partial^2 p}{\partial t^2}
--
-c^2
-\left(
+\approx
+\frac{p_{i,j}^{n+1} - 2p_{i,j}^{n} + p_{i,j}^{n-1}}{(\Delta t)^2}
+\]
+
+De rumsliga derivatorna approximeras som
+
+\[
 \frac{\partial^2 p}{\partial x^2}
-+
+\approx
+\frac{p_{i+1,j}^n - 2p_{i,j}^n + p_{i-1,j}^n}{(\Delta x)^2}
+\]
+
+\[
 \frac{\partial^2 p}{\partial y^2}
+\approx
+\frac{p_{i,j+1}^n - 2p_{i,j}^n + p_{i,j-1}^n}{(\Delta x)^2}
+\]
+
+Genom att ersätta derivatorna i vågekvationen med dessa
+diskreta approximationer och lösa ut $p_{i,j}^{n+1}$ erhålls
+den diskreta uppdateringsregeln.
+
+Insättning av dessa approximationer i vågekvationen ger
+
+\[
+\frac{p_{i,j}^{n+1}-2p_{i,j}^{n}+p_{i,j}^{n-1}}{(\Delta t)^2}
+=
+c^2
+\frac{
+p_{i+1,j}^n+p_{i-1,j}^n+p_{i,j+1}^n+p_{i,j-1}^n-4p_{i,j}^n
+}{(\Delta x)^2}
+\]
+
+vilket efter omskrivning ger den diskreta uppdateringsregeln nedan.
+Denna ekvation används sedan för att beräkna hur tryckfältet
+utvecklas över tid i simuleringen.
+
+Multiplikation med $(\Delta t)^2$ ger
+
+\[
+p_{i,j}^{n+1} - 2p_{i,j}^{n} + p_{i,j}^{n-1}
+=
+c^2 \frac{(\Delta t)^2}{(\Delta x)^2}
+\left(
+p_{i+1,j}^n + p_{i-1,j}^n + p_{i,j+1}^n + p_{i,j-1}^n - 4p_{i,j}^n
 \right)
 \]
 
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function wave_equation_step(p_now, p_prev, c_field, dt, dx):
+Genom att definiera $r = \frac{c\Delta t}{\Delta x}$ fås uppdateringsregeln nedan.
 
-  # p_now  : pressure field at time n
-  # p_prev : pressure field at time n-1
-  # c_field: local wave speed at each grid cell
-  # dt     : time step
-  # dx     : spatial step (grid spacing)
 
-  p_next = array_like(p_now)
+\subsection{Diskret 2D-vågekvation (numerisk modell)}
+Denna metod kallas Finite Difference Time Domain (FDTD)
+och är en standardmetod för att lösa vågekvationer numeriskt.
 
-  for each interior cell (i,j):
-
-    # Local wave speed
-    c = c_field[i,j]
-
-    # CFL number (must satisfy c*dt/dx <= 1/sqrt(2))
-    r = (c * dt) / dx
-
-    # Discrete Laplacian (2D)
-    laplacian =
-        p_now[i+1,j] +
-        p_now[i-1,j] +
-        p_now[i,j+1] +
-        p_now[i,j-1] -
-        4 * p_now[i,j]
-
-    # Update rule from discrete wave equation
-    p_next[i,j] =
-        2 * p_now[i,j]
-        - p_prev[i,j]
-        + (r*r) * laplacian
-
-  apply_boundary_conditions(p_next)
-
-  return p_next
-\end{lstlisting}
-Notera att stabilitetsvillkoret (CFL-villkoret) i två dimensioner kräver:
-\[
-\frac{c \Delta t}{\Delta x} \le \frac{1}{\sqrt{2}}
-\]
-Om detta villkor inte uppfylls blir simuleringen numeriskt instabil.
-
-Planvågor och cirkulära vågor kan ses som lösningar till denna ekvation.
-
-Denna ekvation är den centrala lagen som styr hur ljud sprids i rummet.
-Den säger att den tidsmässiga förändringen av trycket beror på hur
-trycket varierar rumsligt.
-
-Om tryckfältet är krökt (det vill säga har en hög andra derivata i rummet),
-kommer detta att generera acceleration i tryckfältet över tid.
-Detta är den matematiska beskrivningen av hur vågor uppstår och sprids.
-
-Våghastigheten $c$ bestäms av materialets egenskaper och avgör hur snabbt
-tryckvariationer färdas genom mediet.
-
-
-\section{Superposition (linjäritet)}
-Eftersom modellen är linjär gäller:
-\begin{equation}
-p_{\text{tot}} = \sum_i p_i
-\end{equation}
-
-Funktion:
-\[
-p_{\text{tot}}(x,y,t;\{p_i\})
-=
-\sum_{i=1}^{N} p_i(x,y,t)
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function superpose(fields_at_point):
-  # fields_at_point = [p1, p2, ..., pN] evaluated at same (x,y,t)
-  total = 0
-  for value in fields_at_point:
-    total += value
-  return total
-\end{lstlisting}
-
-Detta innebär att fenomen som interferens, noder och förstärkning uppstår automatiskt när flera källor bidrar samtidigt.
-
-Superposition innebär att flera ljudkällor kan existera samtidigt utan att
-förstöra varandras vågor. Istället summeras deras bidrag punktvis.
-
-Fenomen som interferens, förstärkning, utsläckning och slagningar är inte
-separata lagar, utan naturliga konsekvenser av att systemet är linjärt.
-
-
-\section{Medium och material}
-Ett mediums egenskaper sammanfattas främst av $\rho$ och $c$.
-
-
-\subsection{Bulkmodul}
-\begin{equation}
-K = \rho c^2
-\end{equation}
-
-Funktion:
-\[
-K(\rho,c) = \rho c^2
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function bulk_modulus(rho, c):
-  assert rho > 0 and c > 0
-  return rho * c * c
-\end{lstlisting}
-
-Bulkmodulen beskriver hur svårt det är att komprimera materialet.
-Ett material med hög bulkmodul (exempelvis vatten eller metall)
-motstår kompression mer än luft.
-
-Eftersom ljud är longitudinella tryckvågor är kompressibilitet
-direkt kopplad till hur vågor sprids.
-
-
-\subsection{Akustisk impedans}
-\begin{equation}
-Z = \rho c
-\end{equation}
-
-Funktion:
-\[
-Z(\rho,c) = \rho c
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function impedance(rho, c):
-  assert rho > 0 and c > 0
-  return rho * c
-\end{lstlisting}
-
-Impedansen är central för hur vågor delar upp sig i reflektion och transmission vid gränser mellan olika material.
-Akustisk impedans beskriver hur svårt det är för en våg att sätta
-materialet i rörelse.
-
-Skillnader i impedans mellan två material avgör hur mycket av vågen
-som reflekteras respektive transmitteras vid en gränsyta.
-Stora skillnader ger stark reflektion.
-
-
-\section{Reflektion och transmission (normal infallsvinkel)}
-Vid en gränsyta mellan två medier med impedanser $Z_1$ och $Z_2$ (normal infallsvinkel) ges amplitudkoefficienterna av:
-\begin{align}
-R &= \frac{Z_2 - Z_1}{Z_2 + Z_1} \\
-T &= \frac{2Z_2}{Z_2 + Z_1}
-\end{align}
-
-Funktion:
-\[
-R(Z_1,Z_2) =
-\frac{Z_2 - Z_1}{Z_2 + Z_1}
-\]
-\[
-T(Z_1,Z_2) =
-\frac{2Z_2}{Z_2 + Z_1}
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function reflection_coeff(Z1, Z2):
-  denom = Z2 + Z1
-  assert denom != 0
-  return (Z2 - Z1) / denom
-\end{lstlisting}
-\begin{lstlisting}[style=pseudocode]
-function transmission_coeff(Z1, Z2):
-  denom = Z2 + Z1
-  assert denom != 0
-  return (2*Z2) / denom
-\end{lstlisting}
-
-Stora skillnader i $Z$ ger nära total reflektion.
-Dessa relationer gäller för normal infallsvinkel.
-Reflektionskoefficienten $R$ beskriver hur stor del av amplituden
-som studsar tillbaka.
-
-Transmissionskoefficienten $T$ beskriver hur stor del som fortsätter
-in i det nya mediet.
-
-Energin som reflekteras är proportionell mot $|R|^2$.
-
-
-\section{Absorption}
-En enkel dämpningsmodell är exponentiell avklingning med avstånd:
-\begin{equation}
-p(r) = p_0 e^{-\alpha r}
-\end{equation}
-
-Funktion:
-\[
-A_{\text{abs}}(r,\alpha)
-=
-e^{-\alpha r}
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function absorption_factor(r, alpha):
-  # alpha >= 0, r >= 0
-  return exp(-alpha * r)
-\end{lstlisting}
-
-I numeriska simuleringar implementeras absorption ofta via en dämpningsterm eller en \emph{sponge layer} nära kanter.
-Absorption innebär att en del av vågens energi omvandlas till värme
-eller inre friktion i materialet.
-
-I simuleringen används absorption för att:
-\begin{itemize}
-\item modellera mjuka material
-\item undvika orealistiska oändliga reflektioner
-\item skapa stabila randvillkor vid skärmens kanter
-\end{itemize}
-
-
-\section{Temperaturberoende ljudhastighet (luft)}
-Exakt modell för ideal gas:
-\begin{equation}
-c = \sqrt{\gamma \frac{RT}{M}}
-\end{equation}
-Praktisk approximation för luft:
-\begin{equation}
-c(T) \approx 331 + 0.6T
-\end{equation}
-där $T$ är i $^\circ$C och $c$ fås i m/s.
-
-Funktion:
-\[
-c_{\text{air}}(T) = 331 + 0.6T
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function speed_of_sound_air(T_celsius):
-  return 331 + 0.6*T_celsius
-\end{lstlisting}
-
-Ljudhastigheten i en gas bestäms av hur snabbt tryckförändringar kan
-spridas genom materialet. Detta beror på två faktorer:
-materialets kompressibilitet och dess densitet.
-
-För ideal gas gäller att ljudhastigheten ökar med temperaturen.
-Detta beror på att molekylerna rör sig snabbare vid högre temperatur,
-vilket gör att tryckstörningar överförs snabbare mellan molekylerna.
-
-Det är viktigt att notera att ljudhastigheten i en gas i första
-approximation är oberoende av trycket, men starkt beroende av temperaturen.
-
-I simuleringen innebär detta att en temperaturförändring i luft
-direkt påverkar hur snabbt vågor rör sig i planet.
-
-
-\section{Densitet i gas}
-För luft kan densiteten approximeras med idealgaslagen:
-\begin{equation}
-\rho = \frac{p}{R_{\text{spec}}T}
-\end{equation}
-
-Funktion:
-\[
-\rho_{\text{gas}}(p,T)
-=
-\frac{p}{R_{\text{spec}}T}
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function gas_density(p, T_kelvin, R_spec):
-  assert T_kelvin > 0
-  return p / (R_spec * T_kelvin)
-\end{lstlisting}
-
-Densiteten i en gas beror på både temperatur och tryck.
-Vid högre temperatur expanderar gasen och densiteten minskar,
-förutsatt att trycket är konstant.
-
-Eftersom akustisk impedans ges av $Z = \rho c$ påverkar
-förändringar i densitet hur stark reflektion och transmission
-blir vid gränser mellan olika medier.
-
-I praktiken kan man i en förenklad modell hålla $\rho$ konstant
-för luft, men den fullständiga relationen visas här för
-fysikalisk korrekthet.
-
-
-\section{Intensitet och ljudnivå}
-Intensitet (energiflöde per area) kan relateras till RMS-tryck:
-\begin{equation}
-I = \frac{p_{\text{rms}}^2}{\rho c}
-\end{equation}
-
-Funktion:
-\[
-I(p_{\text{rms}},\rho,c)
-=
-\frac{p_{\text{rms}}^2}{\rho c}
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function intensity(p_rms, rho, c):
-  assert rho > 0 and c > 0
-  return (p_rms*p_rms) / (rho*c)
-\end{lstlisting}
-
-Ljudtrycksnivå i decibel (SPL):
-\begin{equation}
-L_p = 20\log_{10}\left(\frac{p_{\text{rms}}}{p_0}\right)
-\end{equation}
-
-Funktion:
-\[
-L_p(p_{\text{rms}})
-=
-20\log_{10}\left(\frac{p_{\text{rms}}}{p_0}\right)
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function spl_db(p_rms, p_ref):
-  # p_ref = 20 microPascal in air, typically
-  assert p_rms > 0 and p_ref > 0
-  return 20 * log10(p_rms / p_ref)
-\end{lstlisting}
-
-Intensitet beskriver hur mycket energi som transporteras
-per ytenhet och tidsenhet av ljudvågen.
-
-Eftersom intensiteten är proportionell mot kvadraten på tryckamplituden,
-innebär en fördubbling av tryckamplituden en fyrdubbling av energin.
-
-Ljudnivå i decibel (dB) är en logaritmisk representation av tryck.
-Den logaritmiska skalan speglar hur människans hörsel uppfattar
-ljudstyrka, även om simuleringen i detta projekt främst
-visualiserar det fysiska tryckfältet och inte den upplevda styrkan.
-
-Denna relation är viktig om tryckfältets amplitud ska
-översättas till färgintensitet eller visuell styrka i spelet.
-
-
-\section{Diskret 2D-vågekvation (numerisk modell)}
-För en grid-baserad simulering (FDTD) kan tryckfältet uppdateras enligt:
 \begin{equation}
 p_{i,j}^{n+1}
 =
@@ -577,17 +298,16 @@ p_{i,j+1}^n + p_{i,j-1}^n
 \right)
 \end{equation}
 
-Funktion:
-\[
-p^{n+1}_{i,j}
-=
-\mathcal{F}(p^n_{i,j},c,\Delta t,\Delta x)
-\]
+Uttrycket inom parentes motsvarar den diskreta
+Laplacianen i två dimensioner och beskriver hur
+tryckfältet varierar i förhållande till sina fyra
+närmaste grannar i rutnätet.
 
 Pseudokod:
 \begin{lstlisting}[style=pseudocode]
 function fdtd_step_pressure(p_now, p_prev, c, dt, dx):
-  # p_now, p_prev are 2D arrays
+  # p_now  : pressure field at time step n
+  # p_prev : pressure field at time step n-1
   r = (c*dt) / dx
   assert r <= 1/sqrt(2)   # CFL condition for 2D
 
@@ -605,54 +325,269 @@ function fdtd_step_pressure(p_now, p_prev, c, dt, dx):
   return p_next
 \end{lstlisting}
 
-där
-\begin{equation}
+\subsubsection{CFL-villkoret}
+
+Den diskreta modellen innehåller den dimensionslösa parametern
+
+\[
 r = \frac{c\Delta t}{\Delta x}
+\]
+
+som kallas CFL-talet.
+För att den numeriska lösningen ska vara stabil måste
+$r \le \frac{1}{\sqrt{2}}$ gälla.
+Storheten $c\Delta t$ motsvarar hur långt en våg färdas under ett
+tidssteg, medan $\Delta x$ är avståndet mellan två gridpunkter.
+Villkoret innebär därför att vågen inte får förflytta sig mer än
+ungefär en gridcell per tidssteg.
+
+
+\subsection{Superposition}
+Eftersom vågekvationen är linjär gäller superpositionsprincipen:
+summan av flera lösningar är också en lösning:
+
+\begin{equation}
+p_{\text{tot}}(x,y,t) = \sum_i p_i(x,y,t)
 \end{equation}
 
-Funktion:
+Detta gör att interferens, förstärkning och utsläckning uppstår
+automatiskt när flera ljudkällor bidrar samtidigt.
+
+
+\clearpage
+\section{Medium och material}
+Utöver själva vågutbredningen påverkas ljudet även av egenskaper
+hos det medium som vågen färdas genom. Dessa egenskaper avgör
+
+\begin{itemize}
+\item hur snabbt vågor sprids
+\item hur mycket energi som förloras under propagation
+\item hur vågor reflekteras vid gränser mellan material
+\end{itemize}
+
+I simuleringen representeras ljudet av tryckfältet $p(x,y,t)$.
+Materialegenskaper påverkar därför direkt hur detta fält utvecklas
+över tid i varje punkt i planet.
+
+
+\subsection{Bakgrundsmedium och lokala material}
+Simuleringen utgår från ett homogent bakgrundsmedium som fyller
+hela planet. Detta medium är normalt luft men kan även vara
+exempelvis vatten beroende på hur simuleringen initialiseras.
+
+Bakgrundsmediet definierar de grundläggande materialparametrarna
+i hela domänen, såsom ljudhastighet, densitet och dämpning.
+Dessa parametrar används i varje punkt i tryckfältet
+$p(x,y,t)$ så länge inget annat material är närvarande.
+
+I spelet kan användaren placera objekt i planet, exempelvis
+väggar eller hinder. Dessa objekt representerar andra material,
+såsom trä, betong eller metall. När ett objekt placeras i
+simuleringen överskriver dess materialparametrar de
+bakgrundsparametrar som annars gäller i dessa positioner.
+
+I den diskreta modellen delas rummet upp i ett rutnät där varje
+punkt representeras av en cell $(i,j)$. Varje cell tilldelas ett
+material som bestämmer vilka fysikaliska parametrar som används
+i just den positionen.
+
 \[
-r(c,\Delta t,\Delta x)
-=
-\frac{c\Delta t}{\Delta x}
+p_{i,j}^n \quad \rightarrow \quad \text{material}(i,j)
 \]
+
+Detta innebär att olika delar av planet kan ha olika
+materialegenskaper samtidigt.
+
+När ett objekt flyttas i spelet uppdateras materialet i de
+gridceller som objektet täcker innan nästa tidssteg i
+simuleringen beräknas. På så sätt kan material förändras
+dynamiskt utan att själva vågekvationen behöver ändras.
 
 Pseudokod:
 \begin{lstlisting}[style=pseudocode]
-function cfl_number(c, dt, dx):
-  assert dx > 0
-  return (c * dt) / dx
+function rebuild_material_field(base_material, objects):
+
+  for each cell (i,j):
+      material[i,j] = base_material
+
+  for each object in objects:
+      for each cell covered by object:
+          material[i,j] = object.material
 \end{lstlisting}
 
-och stabilitetsvillkoret (CFL) i 2D ges av:
+Själva vågsimuleringen använder sedan materialfältet för att
+hämta rätt fysikaliska parametrar i varje punkt i planet.
+Detta gör att olika medium kan samexistera i simuleringen
+och påverka hur ljudvågor sprids och reflekteras.
+
+
+\subsection{Dämpning i mediet}
+När ljudvågor propagerar genom ett medium förloras en del av
+vågens energi genom flera fysikaliska processer, bland annat
+viskös friktion i vätskan eller gasen, värmeledning mellan 
+kompression och expansion och interna rörelser i materialets 
+struktur. Dessa processer gör att vågens amplitud gradvis 
+minskar när vågen färdas genom mediet.
+
+
+\subsubsection{Kontinuerlig modell}
+I en kontinuerlig beskrivning kan denna energiförlust modelleras
+som en exponentiell avklingning av amplituden
+
+\[
+p(d) = p_0 e^{-\alpha d}
+\]
+
+där $p_0$ är initial amplitud, \quad $d$ är färdad sträcka, \quad
+$\alpha$ är en absorptionskoefficient som beror på materialet.
+
+Eftersom ljudvågor färdas med hastigheten $c$ gäller sambandet
+$d = ct$ vilket innebär att dämpningen även kan uttryckas som 
+en funktion av tiden.
+
+
+\subsubsection{Diskret implementering}
+I den numeriska simuleringen representeras tryckfältet av värden
+i varje punkt i rutnätet:
+
+\[
+p_{i,j}^n
+\]
+
+I stället för att beräkna exakt hur långt varje våg har färdats
+modelleras energiförlusten genom en enkel tidsbaserad dämpning.
+Vid varje tidssteg multipliceras tryckfältet med en faktor
+
+\[
+p_{i,j}^n \leftarrow \beta\, p_{i,j}^n
+\]
+
+där $0 < \beta < 1$ är en parameter som bestämmer hur snabbt 
+amplituden avtar. Denna modell innebär att vågor som existerar 
+längre tid i simuleringen gradvis förlorar energi, oberoende 
+av hur de reflekteras eller interfererar i systemet.
+
+Pseudokod:
+\begin{lstlisting}[style=pseudocode]
+function apply_damping(field, beta):
+  for each cell (i,j):
+    field[i,j] = beta * field[i,j]
+\end{lstlisting}
+
+I praktiken appliceras denna dämpning direkt på tryckfältet 
+$p(x,y,t)$ och påverkar därför alla vågor i simuleringen 
+oberoende av deras ursprung. FDTD-uppdateringen sker för 
+varje tidssteg i tryckfältet.
+
+
+\subsection{Materialparametrar}
+Olika material påverkar ljudvågor genom ett antal fysikaliska
+egenskaper. De viktigaste i akustik är densitet $\rho$, 
+ljudhastighet $c$ och akustisk impedans $Z$.
+
+Dessa storheter bestämmer både hur snabbt vågor sprids i
+materialet och hur vågor beter sig vid gränser mellan
+olika material.
+
+
+\subsubsection{Ljudhastighet}
+Ljudhastigheten bestämmer hur snabbt tryckvariationer
+sprids genom mediet. Den beror på materialets elasticitet
+och densitet. För en ideal gas ges ljudhastigheten av:
+
 \begin{equation}
-r \le \frac{1}{\sqrt{2}}
+c = \sqrt{\gamma \frac{RT}{M}}
 \end{equation}
-Den diskreta modellen används för att numeriskt approximera
-den kontinuerliga vågekvationen.
 
-Tryckfältet beräknas punktvis i ett rutnät.
-Vid varje tidssteg uppdateras varje punkt baserat på
-grannpunkternas värden.
+I praktiska simuleringar används ofta en enklare
+approximation för luft
 
-Stabilitetsvillkoret (CFL-villkoret) säkerställer att
-numeriska lösningen inte divergerar.
+\begin{equation}
+c(T) \approx 331 + 0.6T
+\end{equation}
+
+där $T$ är temperaturen i $^\circ$C och $c$ erhålls i m/s.
+
+Pseudokod:
+\begin{lstlisting}[style=pseudocode]
+function speed_of_sound_air(T_celsius):
+  return 331 + 0.6*T_celsius
+\end{lstlisting}
+
+Genom att ändra värdet på $c$ kan simuleringen enkelt
+representera olika medium såsom luft, vatten eller fasta
+material.
 
 
+\subsubsection{Akustisk impedans}
+Den akustiska impedansen definieras som
+
+\begin{equation}
+Z = \rho c
+\end{equation}
+
+Impedansen beskriver hur svårt det är för en ljudvåg
+att sätta materialet i rörelse. Den spelar en central
+roll när en våg möter en gräns mellan två material.
+
+Pseudokod:
+\begin{lstlisting}[style=pseudocode]
+function impedance(rho, c):
+  assert rho > 0 and c > 0
+  return rho * c
+\end{lstlisting}
+
+
+\subsection{Reflektion och transmission}
+När en ljudvåg når en gräns mellan två material med olika
+akustisk impedans delas vågen upp i två komponenter:
+
+\begin{itemize}
+\item en reflekterad våg som fortsätter i det första materialet
+\item en transmitterad våg som fortsätter in i det andra materialet
+\end{itemize}
+
+Vid normal infallsvinkel ges amplitudkoefficienterna av
+\begin{align}
+R &= \frac{Z_2 - Z_1}{Z_2 + Z_1} \\
+T &= \frac{2Z_2}{Z_2 + Z_1}
+\end{align}
+
+där $Z_1$ och $Z_2$ är impedanserna i de två materialen.
+
+Reflektionskoefficienten $R$ anger hur stor del av
+vågens amplitud som reflekteras, medan
+transmissionskoefficienten $T$ anger hur stor del
+som fortsätter in i det andra materialet.
+Den reflekterade energin är proportionell mot $|R|^2$.
+
+Pseudokod:
+\begin{lstlisting}[style=pseudocode]
+function reflection_coeff(Z1, Z2):
+  denom = Z1 + Z2
+  assert denom != 0
+  return (Z2 - Z1) / denom
+
+function transmission_coeff(Z1, Z2):
+  denom = Z1 + Z2
+  assert denom != 0
+  return (2*Z2) / denom
+\end{lstlisting}
+
+I den tvådimensionella simuleringen innebär detta att
+när en vågfront i tryckfältet $p(x,y,t)$ når en gräns
+mellan två material kommer en del av vågen att studsa
+tillbaka medan resten fortsätter in i det nya materialet.
+Skillnader i impedans avgör hur stark denna reflektion
+blir.
+
+\clearpage
 \section{Piano som källa}
-
 \subsection{Tangent $\rightarrow$ frekvens (liksvävig temperatur)}
 \begin{equation}
 f_n = 440 \cdot 2^{n/12}
 \end{equation}
 där $n=0$ motsvarar A4 (440 Hz).
-
-Funktion:
-\[
-f_{\text{tone}}(n)
-=
-440 \cdot 2^{n/12}
-\]
 
 Pseudokod:
 \begin{lstlisting}[style=pseudocode]
@@ -663,57 +598,21 @@ function piano_frequency(semitones_from_A4):
 Liksvävig temperatur innebär att varje halvton är separerad
 av en konstant frekvensfaktor $2^{1/12}$.
 Detta möjliggör spel i alla tonarter utan omstämning.
+Som visas i Figur \ref{fig:piano} representeras olika noter 
+med olika frekvenser.
 
-
-\subsection{Strängens fysik (bakgrund)}
-\begin{equation}
-f_1 = \frac{1}{2L}\sqrt{\frac{T}{\mu}}
-\end{equation}
-
-Funktion:
-\[
-f_{\text{string}}(L,T,\mu)
-=
-\frac{1}{2L}\sqrt{\frac{T}{\mu}}
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function string_fundamental(L, tension, mu):
-  assert L > 0 and tension > 0 and mu > 0
-  return (1/(2*L)) * sqrt(tension/mu)
-\end{lstlisting}
-
-Denna relation härleds från vågekvationen för en spänd sträng
-med fasta ändpunkter. Strängen kan endast vibrera i vissa
-diskreta egenmoder, vilket leder till att endast specifika
-frekvenser är tillåtna.
-
-Frekvensen ökar om:
-\begin{itemize}
-\item strängen blir kortare ($L$ minskar),
-\item spänningen ökar ($T$ ökar),
-\item massan per längdenhet minskar ($\mu$ minskar).
-\end{itemize}
-
-I ett piano används en kombination av olika stränglängder,
-spänningar och tjocklekar för att skapa hela tonregistret.
-
-Den liksväviga temperaturformeln som används i simuleringen
-är en musikalisk standardisering av dessa fysikaliska relationer.
+\begin{figure}[h]
+\centering
+\includegraphics[width=0.6\textwidth]{piano.png}
+\caption{Piano som ljudkälla i modellen.}
+\label{fig:piano}
+\end{figure}
 
 \clearpage
 \subsection{Harmonisk serie och signalmodell}
 \begin{equation}
 f_n = n f_1
 \end{equation}
-
-Funktion:
-\[
-f_{\text{harm}}(n,f_1)
-=
-n f_1
-\]
 
 Pseudokod:
 \begin{lstlisting}[style=pseudocode]
@@ -727,15 +626,6 @@ En förenklad modell för tonens trycksignal:
 p(t) = \sum_{n=1}^N A_n \cos(2\pi n f_1 t + \phi_n)
 \end{equation}
 
-Funktion:
-\[
-p_{\text{piano}}(t)
-=
-\sum_{n=1}^{N}
-A_n
-\cos(2\pi n f_1 t + \phi_n)
-\]
-
 Pseudokod:
 \begin{lstlisting}[style=pseudocode]
 function piano_signal(t, f1, A, phi, N):
@@ -746,44 +636,17 @@ function piano_signal(t, f1, A, phi, N):
   return sum
 \end{lstlisting}
 
-
 En pianoton består inte av en enda frekvens utan av flera
 harmoniska övertoner.
-
 Det är summan av dessa komponenter som ger instrumentet
 dess karakteristiska klang.
-
 När strängen vibrerar sätter den i sin tur ljudbrädan i rörelse,
 vilket kopplar strängens mekaniska vibration till luftens tryckfält.
 Det är denna koppling som genererar den akustiska tryckvågen
 som sedan beskrivs av 2D-vågekvationen i simuleringen.
-
 I modellen representeras denna process genom att pianotonen
 introduceras som en tryckkälla i planet.
-
-
-\subsection{Envelope (avklingning)}
-\begin{equation}
-A(t) = A_0 e^{-t/\tau}
-\end{equation}
-
-Funktion:
-\[
-A_{\text{env}}(t)
-=
-A_0 e^{-t/\tau}
-\]
-
-Pseudokod:
-\begin{lstlisting}[style=pseudocode]
-function envelope(t, A0, tau):
-  if t < 0: return 0
-  assert tau > 0
-  return A0 * exp(-t/tau)
-\end{lstlisting}
-
-Envelope-funktionen beskriver hur tonens amplitud förändras över tid.
-Detta motsvarar hur en pianoton naturligt klingar av efter att
-tangenten slagits an.
+Detta tryckbidrag adderas till tryckfältet p(x,y,t) i
+simuleringen och utvecklas därefter enligt vågekvationen.
 
 \end{document}
