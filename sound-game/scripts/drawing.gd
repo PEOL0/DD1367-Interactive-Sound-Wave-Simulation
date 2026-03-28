@@ -161,7 +161,7 @@ func create_l_shape(center: Vector2, size: float = 60.0) -> void:
 func spawn_speaker(world_pos: Vector2) -> void:
 	var main_node := get_parent()
 
-	if not can_spawn_speaker_at(main_node, world_pos):
+	if not _can_spawn_speaker_at(main_node, world_pos):
 		print("too close to another speaker")
 		return
 
