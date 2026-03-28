@@ -8,6 +8,9 @@ var HUD: HBoxContainer
 
 var dragged_shape: Polygon2D = null
 var drag_offset: Vector2 = Vector2.ZERO
+const MIN_SPEAKER_DISTANCE := 25.0
+const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
+const SPEAKER_TEXTURE := preload("res://assets/PVK_Speaker.png")
 
 var colors: Array[Color] = [Color("e83d84"), Color("e79775"), Color("8ec4cb"), Color("c44599"), Color("b4f5a2"), Color("5ee08a"), Color("c996ed"), Color("ffcc74")]
 
@@ -55,6 +58,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					HUD.Tool.DELETE:
 						print("clearar")
 						clear_shapes()
+
+					HUD.Tool.SPEAKER:
+						print("Skapar speaker")
+						spawn_speaker(world_mouse_pos)
 		
 		else:
 			# Mouse Released
@@ -149,6 +156,34 @@ func create_l_shape(center: Vector2, size: float = 60.0) -> void:
 	])
 	
 	create_polygon(points)
+
+
+func spawn_speaker(world_pos: Vector2) -> void:
+	var main_node := get_parent()
+
+	if not can_spawn_speaker_at(main_node, world_pos):
+		print("too close to another speaker")
+		return
+
+	var new_speaker := Node2D.new()
+	new_speaker.set_script(SPEAKER_SCRIPT)
+
+	var sprite := Sprite2D.new()
+	sprite.name = "Sprite2D"
+	sprite.texture = SPEAKER_TEXTURE
+	sprite.region_rect = Rect2(0, 0, 50, 50)
+	new_speaker.add_child(sprite)
+
+	main_node.add_child(new_speaker)
+	new_speaker.global_position = world_pos
+
+
+func _can_spawn_speaker_at(main_node: Node, world_pos: Vector2) -> bool:
+	for child in main_node.get_children():
+		if child is Node2D and child.has_method("emit_sound"):
+			if (child as Node2D).global_position.distance_to(world_pos) < MIN_SPEAKER_DISTANCE:
+				return false
+	return true
 
 
 func clear_shapes():

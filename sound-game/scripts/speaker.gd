@@ -25,7 +25,7 @@ func get_grid_position() -> Vector2i:
 	if main and main.has_method("get_grid_size"):
 		grid_size = main.get_grid_size()
 	else:
-		push_error("Missing _inject_impulse (How did that happen?)")
+		push_error("Missing get_grid_size (How did that happen?)")
 
 	var gx := clampi(int(round(position.x + float(grid_size.x) * 0.5)), 0, grid_size.x - 1)
 	var gy := clampi(int(round(position.y + float(grid_size.y) * 0.5)), 0, grid_size.y - 1)

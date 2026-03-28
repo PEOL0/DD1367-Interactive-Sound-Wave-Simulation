@@ -3,7 +3,6 @@ extends Node
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
 @onready var HUD: HBoxContainer = $Panel/HBoxContainer
-@onready var speaker: Node2D = $Speaker
 
 const N := [1600, 900]
 const TOTAL := N[0] * N[1]
@@ -224,14 +223,24 @@ func _inject_impulse(gx: int, gy: int, amplitude: float = 1.0):
 	pending_impulses.append({"gx": gx, "gy": gy, "amp": amplitude, "sigma": 1.5})
 
 
+func _get_speakers() -> Array[Node]:
+	var speakers: Array[Node] = []
+	for child in get_children():
+		if child is Node2D and child.has_method("emit_sound"):
+			speakers.append(child)
+	return speakers
+
+
 # Handles keyboard input: Space creates a sound pulse in the center, R resets the simulation
 func _unhandled_input(event):
 	if not isMenu:
 		if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
-			if speaker and speaker.has_method("emit_sound"):
-				speaker.emit_sound()
+			var speakers := _get_speakers()
+			if not speakers.is_empty():
+				for speaker_node in speakers:
+					speaker_node.emit_sound()
 			else:
-				push_error("Missing speaker (!!!!!?)")
+				push_warning("Missing speaker (!!!!!?)")
 			print("Sound")
 
 		if event is InputEventKey and event.pressed and event.keycode == KEY_R:

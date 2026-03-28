@@ -4,7 +4,8 @@ enum Tool {
 	SQUARE,
 	TRIANGLE,
 	L,
-	DELETE
+	DELETE,
+	SPEAKER
 }
 
 var current_tool: Tool = Tool.PEN
@@ -15,6 +16,7 @@ var current_tool: Tool = Tool.PEN
 @export var squareButton: Button
 @export var triangleButton: Button
 @export var lButton: Button
+@export var speakerButton: Button
 @export var clearButton: Button
 @export var drawing_node: Node
 
@@ -53,3 +55,9 @@ func l_selection(toggled_on: bool):
 func clear_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.DELETE
+
+
+
+func speaker_selection(toggled_on: bool):
+	if toggled_on:
+		current_tool = Tool.SPEAKER
