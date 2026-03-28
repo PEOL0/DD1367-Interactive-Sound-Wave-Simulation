@@ -1,9 +1,25 @@
 extends Node2D
 
+const SPEAKER_TEXTURE := preload("res://assets/PVK_Speaker.png")
+
 @export var amplitude: float = 1.0
 @onready var sprite: Sprite2D = $Sprite2D
 var _dragging := false
 var _drag_offset := Vector2.ZERO
+
+
+static func spawn_speaker(parent: Node, world_pos: Vector2) -> Node2D:
+	var new_speaker := Node2D.new()
+	new_speaker.set_script(preload("res://scripts/speaker.gd"))
+
+	var speaker_sprite := Sprite2D.new()
+	speaker_sprite.name = "Sprite2D"
+	speaker_sprite.texture = SPEAKER_TEXTURE
+	new_speaker.add_child(speaker_sprite)
+
+	parent.add_child(new_speaker)
+	new_speaker.global_position = world_pos
+	return new_speaker
 
 func _ready():
 	if sprite.texture:

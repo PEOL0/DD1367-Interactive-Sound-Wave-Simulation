@@ -9,6 +9,7 @@ const TOTAL := N[0] * N[1]
 const BUF_BYTES := TOTAL * 4 #4 because it is the size of a 32 bit float
 const WORKGROUP_SIZE := 16
 const DRAWING_SCRIPT := preload("res://scripts/drawing.gd")
+const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
 
 var c_speed := 120.0
 var dx := 1.0
@@ -78,6 +79,7 @@ func _ready():
 		$ColorRect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_spawn_drawing_layer()
 		print("Drawing layer ready")
+		SPEAKER_SCRIPT.spawn_speaker(self,Vector2.ZERO)
 
 	print("Simulation ready – grid %d×%d  c=%.1f  dt=%.6f  CFL r=%.4f" % [
 		N[0], N[1], c_speed, dt, c_speed * dt / dx])

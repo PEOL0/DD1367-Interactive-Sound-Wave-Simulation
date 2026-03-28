@@ -9,8 +9,6 @@
 [ext_resource type="Texture2D" uid="uid://byb3ngrlietj1" path="res://drawings/Trash.png" id="6_7mycd"]
 [ext_resource type="Texture2D" uid="uid://buy1mf67l0wus" path="res://drawings/L-Shape.png" id="7_5vw27"]
 [ext_resource type="Texture2D" uid="uid://f8vyqg7rnse2" path="res://drawings/Triangle.png" id="7_kek77"]
-[ext_resource type="Script" uid="uid://c2iyop051eb2k" path="res://scripts/speaker.gd" id="10_8q3l3"]
-[ext_resource type="Texture2D" uid="uid://dfm05yvitlpht" path="res://assets/PVK_Speaker.png" id="11_3j6r0"]
 [ext_resource type="Texture2D" uid="uid://bau8lt6y0qlp8" path="res://assets/PVK_Speaker_320.png" id="12_dg77c"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1bvp3"]
@@ -43,13 +41,6 @@ offset_bottom = 450.0
 
 [node name="Camera2D" type="Camera2D" parent="." unique_id=1639537310]
 zoom = Vector2(0.72, 0.72)
-
-[node name="Speaker" type="Node2D" parent="." unique_id=148894103]
-script = ExtResource("10_8q3l3")
-
-[node name="Sprite2D" type="Sprite2D" parent="Speaker" unique_id=914988209]
-texture = ExtResource("11_3j6r0")
-region_rect = Rect2(0, 0, 50, 50)
 
 [node name="Panel" type="Panel" parent="." unique_id=1052459994]
 offset_left = -764.0

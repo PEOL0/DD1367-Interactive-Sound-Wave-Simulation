@@ -10,7 +10,6 @@ var dragged_shape: Polygon2D = null
 var drag_offset: Vector2 = Vector2.ZERO
 const MIN_SPEAKER_DISTANCE := 25.0
 const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
-const SPEAKER_TEXTURE := preload("res://assets/PVK_Speaker.png")
 
 var colors: Array[Color] = [Color("e83d84"), Color("e79775"), Color("8ec4cb"), Color("c44599"), Color("b4f5a2"), Color("5ee08a"), Color("c996ed"), Color("ffcc74")]
 
@@ -165,17 +164,7 @@ func spawn_speaker(world_pos: Vector2) -> void:
 		print("too close to another speaker")
 		return
 
-	var new_speaker := Node2D.new()
-	new_speaker.set_script(SPEAKER_SCRIPT)
-
-	var sprite := Sprite2D.new()
-	sprite.name = "Sprite2D"
-	sprite.texture = SPEAKER_TEXTURE
-	sprite.region_rect = Rect2(0, 0, 50, 50)
-	new_speaker.add_child(sprite)
-
-	main_node.add_child(new_speaker)
-	new_speaker.global_position = world_pos
+	SPEAKER_SCRIPT.spawn_speaker(main_node, world_pos)
 
 
 func _can_spawn_speaker_at(main_node: Node, world_pos: Vector2) -> bool:
