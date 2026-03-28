@@ -50,8 +50,6 @@ script = ExtResource("10_8q3l3")
 texture = ExtResource("11_3j6r0")
 region_rect = Rect2(0, 0, 50, 50)
 
-[node name="Sprite2D2" type="Sprite2D" parent="Speaker" unique_id=2134231930]
-
 [node name="Panel" type="Panel" parent="." unique_id=1052459994]
 offset_left = -764.0
 offset_top = -418.0
