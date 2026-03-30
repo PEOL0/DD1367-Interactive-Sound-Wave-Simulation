@@ -9,6 +9,7 @@ const TOTAL := N[0] * N[1]
 const BUF_BYTES := TOTAL * 4 #4 because it is the size of a 32 bit float
 const WORKGROUP_SIZE := 16
 const DRAWING_SCRIPT := preload("res://scripts/drawing.gd")
+const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
 
 var c_speed := 120.0
 var dx := 1.0
@@ -78,6 +79,7 @@ func _ready():
 		$ColorRect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_spawn_drawing_layer()
 		print("Drawing layer ready")
+		SPEAKER_SCRIPT.spawn_speaker(self,Vector2.ZERO)
 
 	print("Simulation ready – grid %d×%d  c=%.1f  dt=%.6f  CFL r=%.4f" % [
 		N[0], N[1], c_speed, dt, c_speed * dt / dx])
@@ -89,6 +91,9 @@ func change_rect():
 	var scale = screen_size_x / $ColorRect.size.x
 	print(scale)
 	$Camera2D.zoom = Vector2(scale, scale)
+
+func get_grid_size() -> Vector2i:
+	return Vector2i(N[0], N[1])
 
 # Runs every physics frame: sends work to the GPU to advance the sound simulation one time step
 func _physics_process(_delta):
@@ -220,11 +225,24 @@ func _inject_impulse(gx: int, gy: int, amplitude: float = 1.0):
 	pending_impulses.append({"gx": gx, "gy": gy, "amp": amplitude, "sigma": 1.5})
 
 
+func _get_speakers() -> Array[Node]:
+	var speakers: Array[Node] = []
+	for child in get_children():
+		if child is Node2D and child.has_method("emit_sound"):
+			speakers.append(child)
+	return speakers
+
+
 # Handles keyboard input: Space creates a sound pulse in the center, R resets the simulation
 func _unhandled_input(event):
 	if not isMenu:
 		if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
-			_inject_impulse(N[0] / 2, N[1] / 2)
+			var speakers := _get_speakers()
+			if not speakers.is_empty():
+				for speaker_node in speakers:
+					speaker_node.emit_sound()
+			else:
+				push_warning("Missing speaker (!!!!!?)")
 			print("Sound")
 
 		if event is InputEventKey and event.pressed and event.keycode == KEY_R:
