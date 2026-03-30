@@ -2,6 +2,7 @@ extends Node
 
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
+@export var use_db: bool = false
 @onready var HUD: HBoxContainer = $Panel/HBoxContainer
 
 const N := [1600, 900]
@@ -14,7 +15,7 @@ const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
 var c_speed := 120.0
 var dx := 1.0
 var dt: float
-var global_damping := 0.999
+var global_damping := 0.9995
 
 var pressure_texture: ImageTexture
 
@@ -40,6 +41,7 @@ func _ready():
 	var img := Image.create(N[0], N[1], false, Image.FORMAT_RF)
 	pressure_texture = ImageTexture.create_from_image(img)
 	shader_material.set_shader_parameter("pressure_field", pressure_texture)
+	shader_material.set_shader_parameter("use_db", 1.0 if use_db else 0.0)
 
 	rd = RenderingServer.create_local_rendering_device()
 
