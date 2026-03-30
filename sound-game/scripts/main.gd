@@ -23,6 +23,8 @@ var pipeline: RID
 var buffers: Array[RID] = []           
 var uniform_sets: Array[RID] = []   
 var obstacle_buffer: RID
+var psi_x_buffer: RID
+var psi_y_buffer: RID
 var step := 0                       
 var pending_impulses: Array = []    
 const PUSH_CONST_SIZE := 48
@@ -54,6 +56,10 @@ func _ready():
 		buffers.append(rd.storage_buffer_create(BUF_BYTES, zero_data))
 	obstacle_buffer = rd.storage_buffer_create(BUF_BYTES, zero_data)
 
+	# PML auxiliary buffers (psi_x, psi_y)
+	psi_x_buffer = rd.storage_buffer_create(BUF_BYTES, zero_data)
+	psi_y_buffer = rd.storage_buffer_create(BUF_BYTES, zero_data)
+
 	var rotations := [
 		[0, 2, 1],
 		[1, 0, 2],
@@ -72,6 +78,18 @@ func _ready():
 		obstacle_uniform.binding = 3
 		obstacle_uniform.add_id(obstacle_buffer)
 		uniforms.append(obstacle_uniform)
+
+		var psi_x_uniform := RDUniform.new()
+		psi_x_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+		psi_x_uniform.binding = 4
+		psi_x_uniform.add_id(psi_x_buffer)
+		uniforms.append(psi_x_uniform)
+
+		var psi_y_uniform := RDUniform.new()
+		psi_y_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+		psi_y_uniform.binding = 5
+		psi_y_uniform.add_id(psi_y_buffer)
+		uniforms.append(psi_y_uniform)
 		uniform_sets.append(rd.uniform_set_create(uniforms, shader_rid, 0))
 
 	if not isMenu:
@@ -100,6 +118,10 @@ func _physics_process(_delta):
 	var dispatch_x := ceili(float(N[0]) / WORKGROUP_SIZE)
 	var dispatch_y := ceili(float(N[1]) / WORKGROUP_SIZE)
 
+	var pml_thickness := 24.0
+	var pml_sigma := 2.0
+	var sigma_dt := pml_sigma * dt
+
 	var compute_list := rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
 	rd.compute_list_bind_uniform_set(compute_list, uniform_sets[step], 0)
@@ -111,9 +133,20 @@ func _physics_process(_delta):
 		rd.compute_list_add_barrier(compute_list)
 	pending_impulses.clear()
 
-	var packedConstants := _pack_step_constants(N[0], N[1], r2, global_damping)
-	rd.compute_list_set_push_constant(compute_list, packedConstants, PUSH_CONST_SIZE)
+	var packed1 := _pack_step_constants(N[0], N[1], r2, global_damping, 1, pml_thickness, sigma_dt)
+	rd.compute_list_set_push_constant(compute_list, packed1, PUSH_CONST_SIZE)
 	rd.compute_list_dispatch(compute_list, dispatch_x, dispatch_y, 1)
+	rd.compute_list_add_barrier(compute_list)
+
+	var packed2 := _pack_step_constants(N[0], N[1], r2, global_damping, 2, pml_thickness, sigma_dt)
+	rd.compute_list_set_push_constant(compute_list, packed2, PUSH_CONST_SIZE)
+	rd.compute_list_dispatch(compute_list, dispatch_x, dispatch_y, 1)
+	rd.compute_list_add_barrier(compute_list)
+
+	var packed3 := _pack_step_constants(N[0], N[1], r2, global_damping, 3, pml_thickness, sigma_dt)
+	rd.compute_list_set_push_constant(compute_list, packed3, PUSH_CONST_SIZE)
+	rd.compute_list_dispatch(compute_list, dispatch_x, dispatch_y, 1)
+	rd.compute_list_add_barrier(compute_list)
 
 	rd.compute_list_end()
 	rd.submit()
@@ -201,8 +234,12 @@ func _pack_base_constants(width: int, height: int, r2_val: float, damping: float
 
 
 # Packs settings for a normal simulation step
-func _pack_step_constants(width: int, height: int, r2_val: float, damping: float) -> PackedByteArray:
-	return _pack_base_constants(width, height, r2_val, damping, 0)
+func _pack_step_constants(width: int, height: int, r2_val: float, damping: float, subpass: int = 0, thickness: float = 0.0, sigma_dt: float = 0.0) -> PackedByteArray:
+	var buf := _pack_base_constants(width, height, r2_val, damping, 0)
+	buf.encode_float(36, float(subpass))
+	buf.encode_float(40, thickness)
+	buf.encode_float(44, sigma_dt)
+	return buf
 
 
 # Packs settings for adding a sound impulse at a specific point on the grid
