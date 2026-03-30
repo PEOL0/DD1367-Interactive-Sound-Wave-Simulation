@@ -1,12 +1,12 @@
 shader_type canvas_item;
 
 uniform sampler2D pressure_field : filter_linear;
-uniform float gain = 5.0;
+uniform float gain = 15.0;
 
 uniform vec3 pos_color = vec3(1.0, 0.6, 0.0);
 uniform vec3 neg_color = vec3(0.0, 0.7, 1.0);
 uniform float use_db = 0.0;
-uniform float min_db = -60.0;
+uniform float min_db = -80.0;
 
 // Samples the FDTD pressure field and maps it to colour.
 // Two modes are supported: linear (default) and decibel (dB).
