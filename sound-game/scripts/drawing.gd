@@ -62,7 +62,7 @@ func _unhandled_input(event: InputEvent) -> void:
 						
 					HUD.Tool.DELETE:
 						print("clearar")
-						clear_shapes()
+						#clear_shapes()
 
 					HUD.Tool.SPEAKER:
 						print("Skapar speaker")
