@@ -99,7 +99,7 @@ func _ready():
 		$ColorRect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_spawn_drawing_layer()
 		print("Drawing layer ready")
-		SPEAKER_SCRIPT.spawn_speaker(self,Vector2.ZERO)
+		SPEAKER_SCRIPT.spawn_speaker(self, Vector2.ZERO, HUD)
 
 	print("Simulation ready – grid %d×%d  c=%.1f  dt=%.6f  CFL r=%.4f" % [
 		N[0], N[1], c_speed, dt, c_speed * dt / dx])
