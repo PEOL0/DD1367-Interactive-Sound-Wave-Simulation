@@ -29,8 +29,14 @@ func _unhandled_input(event: InputEvent) -> void:
 			
 			if clicked_shape:
 				print("Clicked shape")
-				dragged_shape = clicked_shape
-				drag_offset = dragged_shape.position - world_mouse_pos
+				if HUD.current_tool == HUD.Tool.DELETE:
+					if clicked_shape and clicked_shape.get_parent():
+						clicked_shape.free()
+						queue_redraw()
+						emit_signal("geometry_changed")
+					else:
+						dragged_shape = clicked_shape
+						drag_offset = dragged_shape.position - world_mouse_pos
 			
 			else:
 				# 2. Create shape depending on tool
@@ -164,7 +170,7 @@ func spawn_speaker(world_pos: Vector2) -> void:
 		print("too close to another speaker")
 		return
 
-	SPEAKER_SCRIPT.spawn_speaker(main_node, world_pos)
+	SPEAKER_SCRIPT.spawn_speaker(main_node, world_pos, HUD)
 
 
 func _can_spawn_speaker_at(main_node: Node, world_pos: Vector2) -> bool:
