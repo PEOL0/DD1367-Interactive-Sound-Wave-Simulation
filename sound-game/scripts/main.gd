@@ -290,6 +290,10 @@ func _unhandled_input(event):
 			zero_data.fill(0)
 			for buf_rid in buffers:
 				rd.buffer_update(buf_rid, 0, BUF_BYTES, zero_data)
+		
+			rd.buffer_update(psi_x_buffer, 0, BUF_BYTES, zero_data)
+			rd.buffer_update(psi_y_buffer, 0, BUF_BYTES, zero_data)
+			
 			step = 0
 			print("Reset")
 
