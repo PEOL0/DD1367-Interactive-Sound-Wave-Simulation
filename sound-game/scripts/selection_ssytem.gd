@@ -5,7 +5,8 @@ enum Tool {
 	TRIANGLE,
 	L,
 	DELETE,
-	SPEAKER
+	SPEAKER,
+	EMPTY
 }
 
 var current_tool: Tool = Tool.PEN
@@ -31,33 +32,45 @@ func _ready() -> void:
 func pen_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.PEN
+	else:
+		current_tool = Tool.EMPTY
 
 
 
 func square_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.SQUARE
+	else:
+		current_tool = Tool.EMPTY
 
 
 
 func triangle_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.TRIANGLE
+	else:
+		current_tool = Tool.EMPTY
 
 
 
 func l_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.L
+	else:
+		current_tool = Tool.EMPTY
 
 
 
 func clear_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.DELETE
+	else:
+		current_tool = Tool.EMPTY
 
 
 
 func speaker_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.SPEAKER
+	else:
+		current_tool = Tool.EMPTY
