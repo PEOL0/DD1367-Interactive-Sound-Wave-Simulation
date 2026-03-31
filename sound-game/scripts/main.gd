@@ -15,7 +15,7 @@ const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
 var c_speed := 120.0
 var dx := 1.0
 var dt: float
-var global_damping := 0.9995
+var global_damping := 0.999
 
 var pressure_texture: ImageTexture
 
@@ -125,8 +125,8 @@ func _physics_process(_delta):
 	var dispatch_x := ceili(float(N[0]) / WORKGROUP_SIZE)
 	var dispatch_y := ceili(float(N[1]) / WORKGROUP_SIZE)
 
-	var pml_thickness := 24.0
-	var pml_sigma := 2.0
+	var pml_thickness := 72.0
+	var pml_sigma := 1.0
 	var sigma_dt := pml_sigma * dt
 
 	var compute_list := rd.compute_list_begin()

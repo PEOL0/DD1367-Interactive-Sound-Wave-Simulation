@@ -141,7 +141,9 @@ void main() {
         float dist_sq = dx * dx + dy * dy;
         float cutoff = 4.0 * imp_sigma;
         if (dist_sq <= cutoff * cutoff) {
-            p_current[i] += imp_amp * exp(-dist_sq / (2.0 * imp_sigma * imp_sigma));
+            float value = imp_amp * exp(-dist_sq / (2.0 * imp_sigma * imp_sigma));
+            p_current[i] += value;
+            p_previous[i] += value;
         }
     }
 }
