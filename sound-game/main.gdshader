@@ -18,7 +18,7 @@ void fragment() {
 
     float intensity;
     if (use_db < 0.5) {
-        intensity = clamp(mag, 0.0, 1.0);
+        intensity = clamp(mag * gain * gain, 0.0, 1.0);
     } else {
         float dB = 20.0 * log(mag) / log(10.0);
         float norm_db = (dB - min_db) / (-min_db);

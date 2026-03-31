@@ -35,7 +35,6 @@ bg_color = Color(1, 1, 1, 0.72156864)
 
 [node name="Node2D" type="Node2D" unique_id=1514893189]
 script = ExtResource("1_0xm2m")
-use_db = true
 
 [node name="ColorRect" type="ColorRect" parent="." unique_id=1506769678]
 material = SubResource("ShaderMaterial_1bvp3")

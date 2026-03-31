@@ -318,4 +318,9 @@ func _exit_tree():
 			rd.free_rid(pipeline)
 		if shader_rid.is_valid():
 			rd.free_rid(shader_rid)
+		if psi_x_buffer.is_valid():
+			rd.free_rid(psi_x_buffer)
+		if psi_y_buffer.is_valid():
+			rd.free_rid(psi_y_buffer)
+
 		rd.free()
