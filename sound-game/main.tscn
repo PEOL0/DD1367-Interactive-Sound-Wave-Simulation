@@ -65,6 +65,7 @@ triangleButton = NodePath("triangle")
 lButton = NodePath("L-shape")
 speakerButton = NodePath("addSpeaker")
 clearButton = NodePath("clear")
+buttonGroup = ExtResource("4_lquwl")
 
 [node name="Button" type="Button" parent="Panel/HBoxContainer" unique_id=1910227871]
 layout_mode = 2
@@ -110,8 +111,6 @@ icon = ExtResource("12_dg77c")
 layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_kek77")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lquwl")
-toggle_mode = true
-button_group = ExtResource("4_lquwl")
 icon = ExtResource("6_7mycd")
 
 [connection signal="toggled" from="Panel/HBoxContainer/Button" to="Panel/HBoxContainer" method="pen_selection"]
@@ -119,4 +118,4 @@ icon = ExtResource("6_7mycd")
 [connection signal="toggled" from="Panel/HBoxContainer/triangle" to="Panel/HBoxContainer" method="triangle_selection"]
 [connection signal="toggled" from="Panel/HBoxContainer/L-shape" to="Panel/HBoxContainer" method="l_selection"]
 [connection signal="toggled" from="Panel/HBoxContainer/addSpeaker" to="Panel/HBoxContainer" method="speaker_selection"]
-[connection signal="toggled" from="Panel/HBoxContainer/clear" to="Panel/HBoxContainer" method="clear_selection"]
+[connection signal="pressed" from="Panel/HBoxContainer/clear" to="Panel/HBoxContainer" method="clear_selection"]

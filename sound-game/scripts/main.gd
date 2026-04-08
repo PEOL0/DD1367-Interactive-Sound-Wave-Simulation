@@ -137,6 +137,7 @@ func _spawn_drawing_layer():
 	drawing_layer.set_script(DRAWING_SCRIPT)
 	add_child(drawing_layer)
 	drawing_layer.HUD = HUD
+	HUD.drawing_node = drawing_layer
 	if drawing_layer.has_signal("geometry_changed"):
 		drawing_layer.connect("geometry_changed", Callable(self, "_on_geometry_changed"))
 
