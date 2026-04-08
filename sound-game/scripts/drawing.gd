@@ -59,10 +59,6 @@ func _unhandled_input(event: InputEvent) -> void:
 						is_drawing = true
 						current_drawing.clear()
 						current_drawing.append(world_mouse_pos)
-						
-					HUD.Tool.DELETE:
-						print("clearar")
-						#clear_shapes()
 
 					HUD.Tool.SPEAKER:
 						print("Skapar speaker")

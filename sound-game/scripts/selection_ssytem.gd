@@ -4,7 +4,6 @@ enum Tool {
 	SQUARE,
 	TRIANGLE,
 	L,
-	DELETE,
 	SPEAKER,
 	EMPTY
 }
@@ -14,11 +13,6 @@ var current_tool: Tool = Tool.PEN
 # utan använd ButtonGroup i Inspector
 
 @export var penButton: Button
-@export var squareButton: Button
-@export var triangleButton: Button
-@export var lButton: Button
-@export var speakerButton: Button
-@export var clearButton: Button
 @export var drawing_node: Node
 @export var buttonGroup: ButtonGroup
 
