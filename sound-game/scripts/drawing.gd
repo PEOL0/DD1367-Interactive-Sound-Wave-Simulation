@@ -120,7 +120,7 @@ func create_polygon(points: PackedVector2Array) -> void:
 	self.add_child(poly)
 	emit_signal("geometry_changed")
 
-func create_square(center: Vector2, size: float = 50.0) -> void:
+func create_square(center: Vector2, size: float = 60.0) -> void:
 	var half = size / 2
 	
 	var points = PackedVector2Array([
