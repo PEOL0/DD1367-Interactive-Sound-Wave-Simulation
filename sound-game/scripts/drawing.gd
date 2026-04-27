@@ -2,14 +2,19 @@ extends Node2D
 
 signal geometry_changed
 
+const PEN_STROKE_WIDTH := 6.0
+const PEN_HIT_TOLERANCE := 5.0
+const PEN_MIN_SAMPLE_DISTANCE := 8.0
+
 var current_drawing: PackedVector2Array = []
 var is_drawing: bool = false
 var HUD: HBoxContainer
 
-var dragged_shape: Polygon2D = null
+var dragged_shape: Node2D = null
 var drag_offset: Vector2 = Vector2.ZERO
 const MIN_SPEAKER_DISTANCE := 25.0
 const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
+var current_pen_color := Color("e83d84")
 
 var colors: Array[Color] = [Color("e83d84"), Color("e79775"), Color("8ec4cb"), Color("c44599"), Color("b4f5a2"), Color("5ee08a"), Color("c996ed"), Color("ffcc74")]
 
@@ -34,9 +39,9 @@ func _unhandled_input(event: InputEvent) -> void:
 						clicked_shape.free()
 						queue_redraw()
 						emit_signal("geometry_changed")
-					else:
-						dragged_shape = clicked_shape
-						drag_offset = dragged_shape.position - world_mouse_pos
+				else:
+					dragged_shape = clicked_shape
+					drag_offset = dragged_shape.position - world_mouse_pos
 			
 			else:
 				# 2. Create shape depending on tool
@@ -58,6 +63,7 @@ func _unhandled_input(event: InputEvent) -> void:
 						print("Ritar")
 						is_drawing = true
 						current_drawing.clear()
+						current_pen_color = colors.get(randi_range(0, colors.size() - 1))
 						current_drawing.append(world_mouse_pos)
 
 					HUD.Tool.SPEAKER:
@@ -71,7 +77,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				queue_redraw()
 				
 				if current_drawing.size() > 2:
-					create_polygon(current_drawing)
+					create_pen_stroke(current_drawing, current_pen_color)
 				
 				current_drawing.clear()
 			
@@ -84,14 +90,14 @@ func _unhandled_input(event: InputEvent) -> void:
 		var world_mouse_pos = get_global_mouse_position()
 		
 		if is_drawing:
-			current_drawing.append(world_mouse_pos)
+			_append_pen_point(world_mouse_pos)
 			queue_redraw()
 		
 		elif dragged_shape:
 			dragged_shape.position = world_mouse_pos + drag_offset
 
 # This function checks if the mouse position is inside any of our drawn shapes
-func get_shape_under_mouse(mouse_pos: Vector2) -> Polygon2D:
+func get_shape_under_mouse(mouse_pos: Vector2) -> Node2D:
 	# We loop backwards so we grab the shape drawn last (the one visually on top)
 	for i in range(get_child_count() - 1, -1, -1):
 		var child = get_child(i)
@@ -101,7 +107,33 @@ func get_shape_under_mouse(mouse_pos: Vector2) -> Polygon2D:
 			# Use Godot's built-in math to check if the point is inside the polygon
 			if Geometry2D.is_point_in_polygon(local_pos, child.polygon):
 				return child
+		elif child is Line2D and _is_point_near_line(child, mouse_pos):
+			return child
 	return null
+
+func _is_point_near_line(stroke: Line2D, mouse_pos: Vector2) -> bool:
+	if stroke.points.size() < 2:
+		return false
+
+	var local_mouse := stroke.to_local(mouse_pos)
+	var hit_threshold := maxf(stroke.width * 0.5, PEN_STROKE_WIDTH * 0.5) + PEN_HIT_TOLERANCE
+
+	for i in range(stroke.points.size() - 1):
+		var seg_a := stroke.points[i]
+		var seg_b := stroke.points[i + 1]
+		var closest := Geometry2D.get_closest_point_to_segment(local_mouse, seg_a, seg_b)
+		if local_mouse.distance_to(closest) <= hit_threshold:
+			return true
+
+	return false
+
+func _append_pen_point(world_mouse_pos: Vector2) -> void:
+	if current_drawing.is_empty():
+		current_drawing.append(world_mouse_pos)
+		return
+
+	if current_drawing[current_drawing.size() - 1].distance_to(world_mouse_pos) >= PEN_MIN_SAMPLE_DISTANCE:
+		current_drawing.append(world_mouse_pos)
 
 # Turns the drawn line into a solid object
 func create_polygon(points: PackedVector2Array) -> void:
@@ -118,6 +150,21 @@ func create_polygon(points: PackedVector2Array) -> void:
 	# Give it a random pastel color so you can tell them apart!
 	poly.color = colors.get(randi_range(0,colors.size()-1))
 	self.add_child(poly)
+	emit_signal("geometry_changed")
+
+func create_pen_stroke(points: PackedVector2Array, stroke_color: Color) -> void:
+	if points.size() < 2:
+		return
+
+	var stroke := Line2D.new()
+	stroke.width = PEN_STROKE_WIDTH
+	stroke.default_color = stroke_color
+	stroke.joint_mode = Line2D.LINE_JOINT_ROUND
+	stroke.begin_cap_mode = Line2D.LINE_CAP_ROUND
+	stroke.end_cap_mode = Line2D.LINE_CAP_ROUND
+	stroke.antialiased = true
+	stroke.points = points
+	add_child(stroke)
 	emit_signal("geometry_changed")
 
 func create_square(center: Vector2, size: float = 50.0) -> void:
@@ -179,8 +226,8 @@ func _can_spawn_speaker_at(main_node: Node, world_pos: Vector2) -> bool:
 
 func clear_shapes():
 	for child in get_children():
-		if child is Polygon2D:
-			child.free()
+		if child is Polygon2D or child is Line2D:
+			child.queue_free()
 	current_drawing.clear()
 	is_drawing = false
 	dragged_shape = null
@@ -189,5 +236,5 @@ func clear_shapes():
 	emit_signal("geometry_changed")
 
 func _draw():
-	if current_drawing.size() > 5:
-		draw_polygon(current_drawing, [Color(1,0,0)])
+	if current_drawing.size() > 1:
+		draw_polyline(current_drawing, current_pen_color, PEN_STROKE_WIDTH, true)
