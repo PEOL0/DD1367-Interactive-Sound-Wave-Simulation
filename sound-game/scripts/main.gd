@@ -208,45 +208,29 @@ func _rasterize_stroke_mask(stroke: Line2D, width_cells: float, mask_data: Packe
 		return
 
 	var half_thickness := maxf(width_cells * 0.5, stroke.width * 0.5)
-	var min_x := INF
-	var max_x := -INF
-	var min_y := INF
-	var max_y := -INF
-
-	for p in stroke_points:
-		min_x = min(min_x, p.x)
-		max_x = max(max_x, p.x)
-		min_y = min(min_y, p.y)
-		max_y = max(max_y, p.y)
-
-	min_x -= half_thickness
-	max_x += half_thickness
-	min_y -= half_thickness
-	max_y += half_thickness
-
 	var half_width := N[0] * 0.5
 	var half_height := N[1] * 0.5
-	var grid_x_min := clampi(int(floor(min_x + half_width)), 0, N[0] - 1)
-	var grid_x_max := clampi(int(ceil(max_x + half_width)), 0, N[0] - 1)
-	var grid_y_min := clampi(int(floor(min_y + half_height)), 0, N[1] - 1)
-	var grid_y_max := clampi(int(ceil(max_y + half_height)), 0, N[1] - 1)
+	for i in range(stroke_points.size() - 1):
+		var seg_a := stroke_points[i]
+		var seg_b := stroke_points[i + 1]
 
-	for grid_y in range(grid_y_min, grid_y_max + 1):
-		for grid_x in range(grid_x_min, grid_x_max + 1):
-			var world_p := Vector2(float(grid_x) - half_width, float(grid_y) - half_height)
-			if _is_point_near_polyline(world_p, stroke_points, half_thickness):
-				var idx := grid_y * N[0] + grid_x
-				mask_data.encode_u32(idx * 4, 1)
+		var min_x: float = min(seg_a.x, seg_b.x) - half_thickness
+		var max_x: float = max(seg_a.x, seg_b.x) + half_thickness
+		var min_y: float = min(seg_a.y, seg_b.y) - half_thickness
+		var max_y: float = max(seg_a.y, seg_b.y) + half_thickness
 
+		var grid_x_min := clampi(int(floor(min_x + half_width)), 0, N[0] - 1)
+		var grid_x_max := clampi(int(ceil(max_x + half_width)), 0, N[0] - 1)
+		var grid_y_min := clampi(int(floor(min_y + half_height)), 0, N[1] - 1)
+		var grid_y_max := clampi(int(ceil(max_y + half_height)), 0, N[1] - 1)
 
-func _is_point_near_polyline(point: Vector2, polyline: PackedVector2Array, threshold: float) -> bool:
-	for i in range(polyline.size() - 1):
-		var seg_a := polyline[i]
-		var seg_b := polyline[i + 1]
-		var closest := Geometry2D.get_closest_point_to_segment(point, seg_a, seg_b)
-		if point.distance_to(closest) <= threshold:
-			return true
-	return false
+		for grid_y in range(grid_y_min, grid_y_max + 1):
+			for grid_x in range(grid_x_min, grid_x_max + 1):
+				var world_p := Vector2(float(grid_x) - half_width, float(grid_y) - half_height)
+				var closest := Geometry2D.get_closest_point_to_segment(world_p, seg_a, seg_b)
+				if world_p.distance_to(closest) <= half_thickness:
+					var idx := grid_y * N[0] + grid_x
+					mask_data.encode_u32(idx * 4, 1)
 
 
 # Packs the shared simulation settings into raw bytes so the GPU shader can read them
