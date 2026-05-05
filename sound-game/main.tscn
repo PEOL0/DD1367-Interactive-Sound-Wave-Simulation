@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://byb3ngrlietj1" path="res://drawings/Trash.png" id="6_7mycd"]
 [ext_resource type="Texture2D" uid="uid://buy1mf67l0wus" path="res://drawings/L-Shape.png" id="7_5vw27"]
 [ext_resource type="Texture2D" uid="uid://f8vyqg7rnse2" path="res://drawings/Triangle.png" id="7_kek77"]
+[ext_resource type="Texture2D" uid="uid://dct8o8b4hxvck" path="res://drawings/PVK_Background.png" id="11_efxa6"]
 [ext_resource type="Texture2D" uid="uid://bau8lt6y0qlp8" path="res://assets/PVK_Speaker_320.png" id="12_dg77c"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_1bvp3"]
@@ -43,6 +44,7 @@ offset_bottom = 450.0
 zoom = Vector2(0.72, 0.72)
 
 [node name="Panel" type="Panel" parent="." unique_id=1052459994]
+z_index = 1
 offset_left = -764.0
 offset_top = -418.0
 offset_right = -278.585
@@ -50,6 +52,7 @@ offset_bottom = -322.48
 theme_override_styles/panel = SubResource("StyleBoxFlat_5vw27")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=354568315 node_paths=PackedStringArray("penButton")]
+z_index = 1
 layout_mode = 0
 offset_left = 12.755
 offset_top = 12.275
@@ -107,6 +110,11 @@ layout_mode = 2
 theme_override_styles/normal = SubResource("StyleBoxFlat_kek77")
 theme_override_styles/pressed = SubResource("StyleBoxFlat_lquwl")
 icon = ExtResource("6_7mycd")
+
+[node name="PvkBackground" type="Sprite2D" parent="." unique_id=1273233256]
+z_index = -1
+scale = Vector2(0.417, 0.417)
+texture = ExtResource("11_efxa6")
 
 [connection signal="toggled" from="Panel/HBoxContainer/Button" to="Panel/HBoxContainer" method="pen_selection"]
 [connection signal="toggled" from="Panel/HBoxContainer/square" to="Panel/HBoxContainer" method="square_selection"]
