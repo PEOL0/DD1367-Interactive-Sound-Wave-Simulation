@@ -1,6 +1,6 @@
 extends Node2D
 
-signal geometry_changed
+signal geometry_changed(change: Dictionary)
 
 const PEN_STROKE_WIDTH := 6.0
 const PEN_HIT_TOLERANCE := 5.0
@@ -38,7 +38,6 @@ func _unhandled_input(event: InputEvent) -> void:
 					if clicked_shape and clicked_shape.get_parent():
 						clicked_shape.free()
 						queue_redraw()
-						emit_signal("geometry_changed")
 				else:
 					dragged_shape = clicked_shape
 					drag_offset = dragged_shape.position - world_mouse_pos
@@ -82,7 +81,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				current_drawing.clear()
 			
 			if dragged_shape:
-				emit_signal("geometry_changed")
+				emit_signal("geometry_changed", {"type": "move", "shape": dragged_shape})
 				dragged_shape = null 
 
 	# Handle Mouse Movement
@@ -150,7 +149,7 @@ func create_polygon(points: PackedVector2Array) -> void:
 	# Give it a random pastel color so you can tell them apart!
 	poly.color = colors.get(randi_range(0,colors.size()-1))
 	self.add_child(poly)
-	emit_signal("geometry_changed")
+	emit_signal("geometry_changed", {"type": "add", "shape": poly})
 
 func create_pen_stroke(points: PackedVector2Array, stroke_color: Color) -> void:
 	if points.size() < 2:
@@ -165,7 +164,7 @@ func create_pen_stroke(points: PackedVector2Array, stroke_color: Color) -> void:
 	stroke.antialiased = true
 	stroke.points = points
 	add_child(stroke)
-	emit_signal("geometry_changed")
+	emit_signal("geometry_changed", {"type": "add", "shape": stroke})
 
 func create_square(center: Vector2, size: float = 50.0) -> void:
 	var half = size / 2
@@ -233,7 +232,7 @@ func clear_shapes():
 	dragged_shape = null
 	queue_redraw()
 	print("test")
-	emit_signal("geometry_changed")
+	emit_signal("geometry_changed", {"type": "clear"})
 
 func _draw():
 	if current_drawing.size() > 1:
