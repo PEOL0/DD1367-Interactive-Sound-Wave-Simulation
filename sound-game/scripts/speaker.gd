@@ -15,6 +15,7 @@ static func spawn_speaker(parent: Node, world_pos: Vector2, hud: Node = null) ->
 	var speaker_sprite := Sprite2D.new()
 	speaker_sprite.name = "Sprite2D"
 	speaker_sprite.texture = SPEAKER_TEXTURE
+	speaker_sprite.z_index = 3
 	new_speaker.add_child(speaker_sprite)
 
 	parent.add_child(new_speaker)
@@ -54,10 +55,10 @@ func get_grid_position() -> Vector2i:
 func _input(event):
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT:
 		if event.pressed and _is_mouse_over_sprite(get_global_mouse_position()):
-			if HUD and HUD.current_tool == HUD.Tool.DELETE:
-				get_viewport().set_input_as_handled()
-				queue_free()
-				return
+			#if HUD and HUD.current_tool == HUD.Tool.DELETE:
+				#get_viewport().set_input_as_handled()
+				#queue_free()
+				#return
 			_dragging = true
 			_drag_offset = global_position - get_global_mouse_position()
 			get_viewport().set_input_as_handled()
