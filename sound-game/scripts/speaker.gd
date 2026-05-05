@@ -10,6 +10,7 @@ var HUD: HBoxContainer = null
 
 static func spawn_speaker(parent: Node, world_pos: Vector2, hud: Node = null) -> Node2D:
 	var new_speaker := Node2D.new()
+	new_speaker.name = "Speaker"
 	new_speaker.set_script(preload("res://scripts/speaker.gd"))
 
 	var speaker_sprite := Sprite2D.new()
@@ -18,7 +19,7 @@ static func spawn_speaker(parent: Node, world_pos: Vector2, hud: Node = null) ->
 	speaker_sprite.z_index = 3
 	new_speaker.add_child(speaker_sprite)
 
-	parent.add_child(new_speaker)
+	parent.add_child(new_speaker, true)
 	new_speaker.global_position = world_pos
 
 	if hud:
