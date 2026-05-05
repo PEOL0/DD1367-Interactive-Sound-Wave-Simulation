@@ -165,7 +165,7 @@ func create_polygon(points: PackedVector2Array, sprite: Sprite2D = null) -> void
 	self.add_child(poly)
 	if sprite:
 		poly.add_child(sprite)
-	emit_signal("geometry_changed")
+	emit_signal("geometry_changed", {"type": "add", "shape": poly})
 
 func create_pen_stroke(points: PackedVector2Array, stroke_color: Color) -> void:
 	if points.size() < 2:
