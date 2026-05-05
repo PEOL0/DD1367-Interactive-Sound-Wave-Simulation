@@ -43,6 +43,7 @@ offset_bottom = 450.0
 zoom = Vector2(0.72, 0.72)
 
 [node name="Panel" type="Panel" parent="." unique_id=1052459994]
+z_index = 1
 offset_left = -764.0
 offset_top = -418.0
 offset_right = -278.585
@@ -50,6 +51,7 @@ offset_bottom = -322.48
 theme_override_styles/panel = SubResource("StyleBoxFlat_5vw27")
 
 [node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=354568315 node_paths=PackedStringArray("penButton")]
+z_index = 1
 layout_mode = 0
 offset_left = 12.755
 offset_top = 12.275
