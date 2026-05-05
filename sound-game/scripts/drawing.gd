@@ -266,7 +266,7 @@ func _can_spawn_speaker_at(main_node: Node, world_pos: Vector2) -> bool:
 func clear_shapes():
 	for child in get_children():
 		if child is Polygon2D or child is Line2D:
-			child.queue_free()
+			child.free()
 	current_drawing.clear()
 	is_drawing = false
 	dragged_shape = null
