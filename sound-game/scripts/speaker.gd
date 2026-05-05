@@ -1,6 +1,6 @@
 extends Node2D
 
-const SPEAKER_TEXTURE := preload("res://assets/PVK_Speaker.png")
+const SPEAKER_TEXTURE := preload("res://drawings/PVK_Speaker_Version_2.png")
 
 @export var amplitude: float = 1.0
 @onready var sprite: Sprite2D = $Sprite2D
