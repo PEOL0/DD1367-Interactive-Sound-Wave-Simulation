@@ -34,14 +34,8 @@ func _unhandled_input(event: InputEvent) -> void:
 			
 			if clicked_shape:
 				print("Clicked shape")
-				if HUD.current_tool == HUD.Tool.DELETE:
-					if clicked_shape and clicked_shape.get_parent():
-						clicked_shape.free()
-						queue_redraw()
-						emit_signal("geometry_changed")
-				else:
-					dragged_shape = clicked_shape
-					drag_offset = dragged_shape.position - world_mouse_pos
+				dragged_shape = clicked_shape
+				drag_offset = dragged_shape.position - world_mouse_pos
 			
 			else:
 				# 2. Create shape depending on tool
