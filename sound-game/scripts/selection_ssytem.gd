@@ -45,6 +45,7 @@ func square_selection(toggled_on: bool):
 		ghostObject.square(264)
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
 
 
 
@@ -54,6 +55,7 @@ func triangle_selection(toggled_on: bool):
 		ghostObject.triangle(264)
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
 
 
 
@@ -63,6 +65,7 @@ func church_selection(toggled_on: bool):
 		ghostObject.set_sprite("res://drawings/PVK_Church.png", 1.04)
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
 
 
 
@@ -84,3 +87,4 @@ func speaker_selection(toggled_on: bool):
 		ghostObject.set_sprite("res://drawings/PVK_Speaker_Version_2.png")
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
