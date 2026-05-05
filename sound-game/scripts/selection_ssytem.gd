@@ -90,6 +90,11 @@ func clear_selection():
 	ghostObject.clear_polygon()
 	current_tool = Tool.EMPTY
 	drawing_node.clear_shapes()
+	for child in self.get_parent().get_parent().get_children():
+		if child.name.contains("Speaker"):
+			print(child.name)
+			child.free()
+		
 	var activeButton = buttonGroup.get_pressed_button()
 	if activeButton:
 		activeButton.toggle_mode = false
