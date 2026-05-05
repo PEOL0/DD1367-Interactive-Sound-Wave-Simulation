@@ -3,7 +3,9 @@ enum Tool {
 	PEN,
 	SQUARE,
 	TRIANGLE,
-	L,
+	BUILDING,
+	PAVILLION,
+	CHURCH,
 	SPEAKER,
 	EMPTY
 }
@@ -45,6 +47,7 @@ func square_selection(toggled_on: bool):
 		ghostObject.square(264)
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
 
 
 
@@ -54,15 +57,32 @@ func triangle_selection(toggled_on: bool):
 		ghostObject.triangle(264)
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
 
-
-
-func l_selection(toggled_on: bool):
+func pavillion_selection(toggled_on: bool):
 	if toggled_on:
-		current_tool = Tool.L
-		ghostObject.l_shape(264)
+		current_tool = Tool.PAVILLION
+		ghostObject.set_sprite("res://drawings/PVK_Paviljong.png", 1.04)
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
+
+func building_selection(toggled_on: bool):
+	if toggled_on:
+		current_tool = Tool.BUILDING
+		ghostObject.set_sprite("res://drawings/PVK_Buliding_2.png", 1.04)
+	else:
+		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
+
+
+func church_selection(toggled_on: bool):
+	if toggled_on:
+		current_tool = Tool.CHURCH
+		ghostObject.set_sprite("res://drawings/PVK_Church.png", 1.04)
+	else:
+		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
 
 
 
@@ -81,6 +101,7 @@ func speaker_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.SPEAKER
 		ghostObject.clear_polygon()
-		ghostObject.set_sprite("res://assets/PVK_Speaker.png")
+		ghostObject.set_sprite("res://drawings/PVK_Speaker_Version_2.png")
 	else:
 		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()

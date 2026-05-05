@@ -2,6 +2,9 @@ extends Node
 
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
+@export var church_points: PackedVector2Array
+@export var house_points: PackedVector2Array
+@export var pavillion_points: PackedVector2Array
 @onready var HUD: HBoxContainer = $Panel/HBoxContainer
 
 const N := [1600, 900]
@@ -144,6 +147,9 @@ func _spawn_drawing_layer():
 	add_child(drawing_layer)
 	drawing_layer.HUD = HUD
 	HUD.drawing_node = drawing_layer
+	drawing_layer.church_points = church_points
+	drawing_layer.house_points = house_points
+	drawing_layer.pavillion_points = pavillion_points
 	if drawing_layer.has_signal("geometry_changed"):
 		drawing_layer.connect("geometry_changed", Callable(self, "_on_geometry_changed"))
 
