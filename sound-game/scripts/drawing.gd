@@ -157,11 +157,8 @@ func create_polygon(points: PackedVector2Array, sprite: Sprite2D = null) -> void
 	poly.color = colors.get(randi_range(0,colors.size()-1))
 	
 	self.add_child(poly)
-<<<<<<< update-graphic
 	if sprite:
 		poly.add_child(sprite)
-=======
->>>>>>> main
 	emit_signal("geometry_changed", {"type": "add", "shape": poly})
 
 func create_pen_stroke(points: PackedVector2Array, stroke_color: Color) -> void:
