@@ -6,10 +6,6 @@ const PEN_STROKE_WIDTH := 6.0
 const PEN_HIT_TOLERANCE := 5.0
 const PEN_MIN_SAMPLE_DISTANCE := 8.0
 
-const PEN_STROKE_WIDTH := 6.0
-const PEN_HIT_TOLERANCE := 5.0
-const PEN_MIN_SAMPLE_DISTANCE := 8.0
-
 var current_drawing: PackedVector2Array = []
 var is_drawing: bool = false
 var HUD: HBoxContainer
