@@ -6,6 +6,10 @@ const PEN_STROKE_WIDTH := 6.0
 const PEN_HIT_TOLERANCE := 5.0
 const PEN_MIN_SAMPLE_DISTANCE := 8.0
 
+const PEN_STROKE_WIDTH := 6.0
+const PEN_HIT_TOLERANCE := 5.0
+const PEN_MIN_SAMPLE_DISTANCE := 8.0
+
 var current_drawing: PackedVector2Array = []
 var is_drawing: bool = false
 var HUD: HBoxContainer
@@ -38,6 +42,7 @@ func _unhandled_input(event: InputEvent) -> void:
 					if clicked_shape and clicked_shape.get_parent():
 						clicked_shape.free()
 						queue_redraw()
+						emit_signal("geometry_changed")
 				else:
 					dragged_shape = clicked_shape
 					drag_offset = dragged_shape.position - world_mouse_pos
