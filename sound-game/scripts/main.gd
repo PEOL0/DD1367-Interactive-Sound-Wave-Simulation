@@ -3,6 +3,7 @@ extends Node
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
 @export var church_points: PackedVector2Array
+@export var house_points: PackedVector2Array
 @onready var HUD: HBoxContainer = $Panel/HBoxContainer
 
 const N := [1600, 900]

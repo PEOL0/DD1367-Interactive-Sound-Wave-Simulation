@@ -54,8 +54,12 @@ func _unhandled_input(event: InputEvent) -> void:
 						create_triangle(world_mouse_pos)
 					
 					HUD.Tool.CHURCH:
-						print("Skapar L")
+						print("Skapar Kyrka")
 						create_church(world_mouse_pos)
+					
+					HUD.Tool.BUILDING:
+						print("Skapar Byggnad")
+						create_building(world_mouse_pos)
 					
 					HUD.Tool.SQUARE:
 						print("Skapar kvadrat")
@@ -209,6 +213,16 @@ func create_l_shape(center: Vector2, size: float = 60.0) -> void:
 	])
 	
 	create_polygon(points)
+
+func create_building(center: Vector2, size: float = 0.23):
+	var points: PackedVector2Array
+	for point in church_points:
+		points.append(center + point*size)
+	var sprite = Sprite2D.new()
+	sprite.texture = load("res://drawings/PVK_Buliding_2.png")
+	sprite.scale = Vector2(size, size)
+	sprite.position = center
+	create_polygon(points, sprite)
 
 func create_church(center: Vector2, size: float = 0.23):
 	var points: PackedVector2Array
