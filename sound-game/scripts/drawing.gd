@@ -16,6 +16,8 @@ const MIN_SPEAKER_DISTANCE := 25.0
 const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
 var current_pen_color := Color("e83d84")
 
+var church_points: PackedVector2Array
+
 var colors: Array[Color] = [Color("e83d84"), Color("e79775"), Color("8ec4cb"), Color("c44599"), Color("b4f5a2"), Color("5ee08a"), Color("c996ed"), Color("ffcc74")]
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -51,9 +53,9 @@ func _unhandled_input(event: InputEvent) -> void:
 						print("Skapar triangle")
 						create_triangle(world_mouse_pos)
 					
-					HUD.Tool.L:
+					HUD.Tool.CHURCH:
 						print("Skapar L")
-						create_l_shape(world_mouse_pos)
+						create_church(world_mouse_pos)
 					
 					HUD.Tool.SQUARE:
 						print("Skapar kvadrat")
@@ -136,7 +138,7 @@ func _append_pen_point(world_mouse_pos: Vector2) -> void:
 		current_drawing.append(world_mouse_pos)
 
 # Turns the drawn line into a solid object
-func create_polygon(points: PackedVector2Array) -> void:
+func create_polygon(points: PackedVector2Array, sprite: Sprite2D = null) -> void:
 	if points.size() < 3:
 		return
 
@@ -149,7 +151,10 @@ func create_polygon(points: PackedVector2Array) -> void:
 	poly.polygon = points
 	# Give it a random pastel color so you can tell them apart!
 	poly.color = colors.get(randi_range(0,colors.size()-1))
+	
 	self.add_child(poly)
+	if sprite:
+		poly.add_child(sprite)
 	emit_signal("geometry_changed")
 
 func create_pen_stroke(points: PackedVector2Array, stroke_color: Color) -> void:
@@ -204,6 +209,16 @@ func create_l_shape(center: Vector2, size: float = 60.0) -> void:
 	])
 	
 	create_polygon(points)
+
+func create_church(center: Vector2, size: float = 0.23):
+	var points: PackedVector2Array
+	for point in church_points:
+		points.append(center + point*size)
+	var sprite = Sprite2D.new()
+	sprite.texture = load("res://drawings/PVK_Church.png")
+	sprite.scale = Vector2(size, size)
+	sprite.position = center
+	create_polygon(points, sprite)
 
 
 func spawn_speaker(world_pos: Vector2) -> void:
