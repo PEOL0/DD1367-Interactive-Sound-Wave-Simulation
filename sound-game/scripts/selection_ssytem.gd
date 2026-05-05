@@ -4,6 +4,7 @@ enum Tool {
 	SQUARE,
 	TRIANGLE,
 	BUILDING,
+	PAVILLION,
 	CHURCH,
 	SPEAKER,
 	EMPTY
@@ -54,6 +55,14 @@ func triangle_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.TRIANGLE
 		ghostObject.triangle(264)
+	else:
+		current_tool = Tool.EMPTY
+		ghostObject.clear_polygon()
+
+func pavillion_selection(toggled_on: bool):
+	if toggled_on:
+		current_tool = Tool.PAVILLION
+		ghostObject.set_sprite("res://drawings/PVK_Paviljong.png", 1.04)
 	else:
 		current_tool = Tool.EMPTY
 		ghostObject.clear_polygon()

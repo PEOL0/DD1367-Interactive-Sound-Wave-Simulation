@@ -17,6 +17,8 @@ const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
 var current_pen_color := Color("e83d84")
 
 var church_points: PackedVector2Array
+var house_points: PackedVector2Array
+var pavillion_points: PackedVector2Array
 
 var colors: Array[Color] = [Color("e83d84"), Color("e79775"), Color("8ec4cb"), Color("c44599"), Color("b4f5a2"), Color("5ee08a"), Color("c996ed"), Color("ffcc74")]
 
@@ -52,6 +54,10 @@ func _unhandled_input(event: InputEvent) -> void:
 					HUD.Tool.TRIANGLE:
 						print("Skapar triangle")
 						create_triangle(world_mouse_pos)
+					
+					HUD.Tool.PAVILLION:
+						print("Skapar Paviljong")
+						create_pavillion(world_mouse_pos)
 					
 					HUD.Tool.CHURCH:
 						print("Skapar Kyrka")
@@ -214,9 +220,19 @@ func create_l_shape(center: Vector2, size: float = 60.0) -> void:
 	
 	create_polygon(points)
 
+func create_pavillion(center: Vector2, size: float = 0.23):
+	var points: PackedVector2Array
+	for point in pavillion_points:
+		points.append(center + point*size)
+	var sprite = Sprite2D.new()
+	sprite.texture = load("res://drawings/PVK_Paviljong.png")
+	sprite.scale = Vector2(size, size)
+	sprite.position = center
+	create_polygon(points, sprite)
+
 func create_building(center: Vector2, size: float = 0.23):
 	var points: PackedVector2Array
-	for point in church_points:
+	for point in house_points:
 		points.append(center + point*size)
 	var sprite = Sprite2D.new()
 	sprite.texture = load("res://drawings/PVK_Buliding_2.png")
