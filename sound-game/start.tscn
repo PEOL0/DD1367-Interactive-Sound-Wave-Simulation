@@ -1,9 +1,10 @@
-[gd_scene format=3 uid="uid://dperjrjj4rehn"]
+[gd_scene format=3 uid="uid://cov5y302u05b3"]
 
 [ext_resource type="Script" uid="uid://bvgirqmcvyb7y" path="res://scripts/start_menu.gd" id="1_ots34"]
 [ext_resource type="PackedScene" uid="uid://dmukdcbojkio5" path="res://main.tscn" id="2_qn1rc"]
 [ext_resource type="Shader" uid="uid://b38pbiscekded" path="res://main.gdshader" id="3_1n0d2"]
-[ext_resource type="Script" uid="uid://btg4k3ien5hdf" path="res://scripts/main.gd" id="3_y5hus"]
+[ext_resource type="Script" uid="uid://bt17ah4qrcvf" path="res://scripts/main.gd" id="3_y5hus"]
+[ext_resource type="Texture2D" uid="uid://dct8o8b4hxvck" path="res://drawings/PVK_Background.png" id="5_oiuna"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_y5hus"]
 shader = ExtResource("3_1n0d2")
@@ -50,6 +51,10 @@ text = "Quit"
 
 [node name="Camera2D" type="Camera2D" parent="Node" unique_id=1374632228]
 zoom = Vector2(0.72, 0.72)
+
+[node name="PvkBackground" type="Sprite2D" parent="." unique_id=485426892]
+scale = Vector2(0.417, 0.417)
+texture = ExtResource("5_oiuna")
 
 [connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button" to="." method="start_game"]
 [connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button2" to="." method="quit_game"]
