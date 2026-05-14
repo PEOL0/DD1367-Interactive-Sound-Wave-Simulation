@@ -3,8 +3,7 @@ extends Sprite2D
 var polygon: Polygon2D
 var area: Area2D
 var collision_shape: CollisionPolygon2D
-
-var can_place: bool
+var circle_collider: CollisionShape2D
 
 func _ready() -> void:
 	self.modulate = Color(1,1,1,0.6)
@@ -15,7 +14,9 @@ func _ready() -> void:
 	area = Area2D.new()
 	self.add_child(area)
 	collision_shape = CollisionPolygon2D.new()
+	circle_collider = CollisionShape2D.new()
 	area.add_child(collision_shape)
+	area.add_child(circle_collider)
 	
 	area.connect("area_entered", area_entered)
 	area.connect("area_exited", area_exited)
@@ -71,20 +72,28 @@ func create_polygon(points: PackedVector2Array) -> void:
 	polygon.polygon = points
 	self.add_child(polygon)
 
-func set_sprite(path: String, collision_points: PackedVector2Array, size: float = 0.053):
-	self.collision_shape.polygon = collision_points
+func set_sprite(path: String, collision_points: PackedVector2Array = PackedVector2Array(), size: float = 0.053):
+	if collision_points.is_empty():
+		self.circle_collider.scale = Vector2(5/size,5/size)
+		self.collision_shape.polygon.clear()
+		self.circle_collider.shape = CircleShape2D.new()
+	else:
+		self.circle_collider.shape = null
+		self.collision_shape.polygon = collision_points
 	self.scale = Vector2(size,size)
 	self.texture = load(path)
-	print(self.texture)
 
 func clear_polygon() -> void:
 	self.texture = null
 	self.collision_shape.polygon.clear()
+	self.circle_collider.shape = null
 	if polygon:
 		polygon.free()
 
 func area_entered(area: Area2D):
 	self.modulate = Color(1,0.3,0.3,0.6)
+	get_parent().can_place = false
 
 func area_exited(area: Area2D):
 	self.modulate = Color(1,1,1,0.6)
+	get_parent().can_place = true

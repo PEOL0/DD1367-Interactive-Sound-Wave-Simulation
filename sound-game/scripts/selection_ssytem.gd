@@ -20,6 +20,7 @@ var current_tool: Tool = Tool.PEN
 
 var ghostScript: Script = preload("res://scripts/ghost_object.gd")
 var ghostObject: Sprite2D
+var can_place: bool = true
 
 
 func _ready() -> void:
@@ -108,7 +109,7 @@ func speaker_selection(toggled_on: bool):
 	if toggled_on:
 		current_tool = Tool.SPEAKER
 		ghostObject.clear_polygon()
-		ghostObject.set_sprite("res://drawings/PVK_Speaker_Version_2.png")
+		ghostObject.set_sprite("res://drawings/PVK_Speaker_Version_2.png", )
 	else:
 		current_tool = Tool.EMPTY
 		ghostObject.clear_polygon()

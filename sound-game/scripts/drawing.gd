@@ -42,39 +42,40 @@ func _unhandled_input(event: InputEvent) -> void:
 				drag_offset = dragged_shape.position - world_mouse_pos
 			
 			else:
-				# 2. Create shape depending on tool
-				match HUD.current_tool:
-					
-					HUD.Tool.TRIANGLE:
-						print("Skapar triangle")
-						create_triangle(world_mouse_pos)
-					
-					HUD.Tool.PAVILLION:
-						print("Skapar Paviljong")
-						create_pavillion(world_mouse_pos)
-					
-					HUD.Tool.CHURCH:
-						print("Skapar Kyrka")
-						create_church(world_mouse_pos)
-					
-					HUD.Tool.BUILDING:
-						print("Skapar Byggnad")
-						create_building(world_mouse_pos)
-					
-					HUD.Tool.SQUARE:
-						print("Skapar kvadrat")
-						create_square(world_mouse_pos)
-					
-					HUD.Tool.PEN:
-						print("Ritar")
-						is_drawing = true
-						current_drawing.clear()
-						current_pen_color = colors.get(randi_range(0, colors.size() - 1))
-						current_drawing.append(world_mouse_pos)
+				if HUD.can_place:
+					# 2. Create shape depending on tool
+					match HUD.current_tool:
+						
+						HUD.Tool.TRIANGLE:
+							print("Skapar triangle")
+							create_triangle(world_mouse_pos)
+						
+						HUD.Tool.PAVILLION:
+							print("Skapar Paviljong")
+							create_pavillion(world_mouse_pos)
+						
+						HUD.Tool.CHURCH:
+							print("Skapar Kyrka")
+							create_church(world_mouse_pos)
+						
+						HUD.Tool.BUILDING:
+							print("Skapar Byggnad")
+							create_building(world_mouse_pos)
+						
+						HUD.Tool.SQUARE:
+							print("Skapar kvadrat")
+							create_square(world_mouse_pos)
+						
+						HUD.Tool.PEN:
+							print("Ritar")
+							is_drawing = true
+							current_drawing.clear()
+							current_pen_color = colors.get(randi_range(0, colors.size() - 1))
+							current_drawing.append(world_mouse_pos)
 
-					HUD.Tool.SPEAKER:
-						print("Skapar speaker")
-						spawn_speaker(world_mouse_pos)
+						HUD.Tool.SPEAKER:
+							print("Skapar speaker")
+							spawn_speaker(world_mouse_pos)
 		
 		else:
 			# Mouse Released
