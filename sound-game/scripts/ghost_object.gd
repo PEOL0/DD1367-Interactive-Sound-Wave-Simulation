@@ -74,7 +74,7 @@ func create_polygon(points: PackedVector2Array) -> void:
 
 func set_sprite(path: String, collision_points: PackedVector2Array = PackedVector2Array(), size: float = 0.053):
 	if collision_points.is_empty():
-		self.circle_collider.scale = Vector2(5/size,5/size)
+		self.circle_collider.scale = Vector2(5.5/size,5.5/size)
 		self.collision_shape.polygon.clear()
 		self.circle_collider.shape = CircleShape2D.new()
 	else:

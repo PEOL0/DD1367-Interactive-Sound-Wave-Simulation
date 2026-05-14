@@ -12,7 +12,15 @@ static func spawn_speaker(parent: Node, world_pos: Vector2, hud: Node = null) ->
 	var new_speaker := Node2D.new()
 	new_speaker.name = "Speaker"
 	new_speaker.set_script(preload("res://scripts/speaker.gd"))
-
+	
+	var area = Area2D.new()
+	var collider = CollisionShape2D.new()
+	collider.scale = Vector2(1.2, 1.2)
+	collider.shape = CircleShape2D.new()
+	
+	new_speaker.add_child(area)
+	area.add_child(collider)
+	
 	var speaker_sprite := Sprite2D.new()
 	speaker_sprite.name = "Sprite2D"
 	speaker_sprite.texture = SPEAKER_TEXTURE
