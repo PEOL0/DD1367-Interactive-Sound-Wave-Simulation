@@ -160,6 +160,11 @@ func create_polygon(points: PackedVector2Array, sprite: Sprite2D = null) -> void
 	self.add_child(poly)
 	if sprite:
 		poly.add_child(sprite)
+		var area = Area2D.new()
+		var collider = CollisionPolygon2D.new()
+		collider.polygon = points
+		poly.add_child(area)
+		area.add_child(collider)
 	emit_signal("geometry_changed", {"type": "add", "shape": poly})
 
 func create_pen_stroke(points: PackedVector2Array, stroke_color: Color) -> void:
