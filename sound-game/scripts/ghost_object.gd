@@ -5,6 +5,8 @@ var area: Area2D
 var collision_shape: CollisionPolygon2D
 var circle_collider: CollisionShape2D
 
+var colliding_area: Array[Area2D] = []
+
 func _ready() -> void:
 	self.modulate = Color(1,1,1,0.6)
 	polygon = Polygon2D.new()
@@ -93,7 +95,11 @@ func clear_polygon() -> void:
 func area_entered(area: Area2D):
 	self.modulate = Color(1,0.3,0.3,0.6)
 	get_parent().can_place = false
+	self.colliding_area.append(area)
+	
 
 func area_exited(area: Area2D):
-	self.modulate = Color(1,1,1,0.6)
-	get_parent().can_place = true
+	self.colliding_area.erase(area)
+	if self.colliding_area.is_empty():
+		self.modulate = Color(1,1,1,0.6)
+		get_parent().can_place = true
