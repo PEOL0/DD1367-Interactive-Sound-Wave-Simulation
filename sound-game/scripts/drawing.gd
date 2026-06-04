@@ -12,6 +12,7 @@ var HUD: HBoxContainer
 
 var dragged_shape: Node2D = null
 var drag_offset: Vector2 = Vector2.ZERO
+var prev_pos: Vector2 = Vector2.ZERO
 const MIN_SPEAKER_DISTANCE := 25.0
 const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
 var current_pen_color := Color("e83d84")
@@ -40,6 +41,7 @@ func _unhandled_input(event: InputEvent) -> void:
 				print("Clicked shape")
 				dragged_shape = clicked_shape
 				drag_offset = dragged_shape.position - world_mouse_pos
+				prev_pos = dragged_shape.position
 			
 			else:
 				if HUD.can_place:
@@ -89,6 +91,14 @@ func _unhandled_input(event: InputEvent) -> void:
 				current_drawing.clear()
 			
 			if dragged_shape:
+				if dragged_shape.get_child(1).has_overlapping_areas():
+					var colliding = false
+					for area in dragged_shape.get_child(1).get_overlapping_areas():
+						if area.get_parent().get_parent() != HUD:
+							colliding = true
+					
+					if colliding:
+						dragged_shape.position = prev_pos
 				emit_signal("geometry_changed", {"type": "move", "shape": dragged_shape})
 				dragged_shape = null 
 
