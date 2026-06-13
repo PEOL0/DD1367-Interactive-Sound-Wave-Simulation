@@ -41,3 +41,8 @@ git clone https://github.com/PEOL0/DD1367-Interactive-Sound-Wave-Simulation.git
 ### Building from source
 
 To get more info on how to build the project from source please refer to the Godot documentation at <https://docs.godotengine.org/en/stable/tutorials/export/exporting_projects.html>. Note that you need to do step 1-3 above as well.
+
+## Screnshots
+<img width="500" alt="MainScene" src="https://github.com/user-attachments/assets/7042a815-d5ce-4dac-a005-3ddca333c125" /> <img width="500" alt="RandomPlacements" src="https://github.com/user-attachments/assets/460b5627-d898-403d-bcf3-b206ecf81d35" /> <img width="500" alt="MultipleSpeakers" src="https://github.com/user-attachments/assets/5a1c13c2-b4b0-409a-84a9-53be93ae70a1" />
+
+
