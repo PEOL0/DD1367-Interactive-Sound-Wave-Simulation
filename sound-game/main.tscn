@@ -1,6 +1,6 @@
 [gd_scene format=3 uid="uid://dmukdcbojkio5"]
 
-[ext_resource type="Script" uid="uid://bt17ah4qrcvf" path="res://scripts/main.gd" id="1_0xm2m"]
+[ext_resource type="Script" uid="uid://btg4k3ien5hdf" path="res://scripts/main.gd" id="1_0xm2m"]
 [ext_resource type="Shader" uid="uid://b38pbiscekded" path="res://main.gdshader" id="2_h2yge"]
 [ext_resource type="Script" uid="uid://noqswce30spm" path="res://scripts/selection_ssytem.gd" id="3_1bvp3"]
 [ext_resource type="Texture2D" uid="uid://cmv8ajxwakuhh" path="res://drawings/Pen.png" id="3_h2yge"]
@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://btq5byq0h3vyk" path="res://drawings/PVK_Paviljong_Icon.png" id="7_dg77c"]
 [ext_resource type="Texture2D" uid="uid://ur1fj61kvdnk" path="res://drawings/PVK_Speaker_Version_2_320.png" id="9_efxa6"]
 [ext_resource type="Texture2D" uid="uid://dct8o8b4hxvck" path="res://drawings/PVK_Background.png" id="11_efxa6"]
+[ext_resource type="Texture2D" uid="uid://b3h4vwpbuep6u" path="res://drawings/PVK_Size_Thingy.png" id="12_dg77c"]
 [ext_resource type="Texture2D" uid="uid://cvjj8puhjatuf" path="res://drawings/PVK_Buliding_2.png" id="12_ycdy4"]
 [ext_resource type="Texture2D" uid="uid://dxjck3c6dfxj0" path="res://drawings/PVK_Church.png" id="13_w48qg"]
 
@@ -55,7 +56,7 @@ offset_right = -278.585
 offset_bottom = -322.48
 theme_override_styles/panel = SubResource("StyleBoxFlat_5vw27")
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=354568315 node_paths=PackedStringArray("penButton")]
+[node name="HBoxContainer" type="HBoxContainer" parent="Panel" unique_id=354568315 node_paths=PackedStringArray("pen_button")]
 z_index = 1
 layout_mode = 0
 offset_left = 12.755
@@ -66,7 +67,7 @@ scale = Vector2(0.225, 0.225)
 size_flags_horizontal = 0
 theme_override_constants/separation = 256
 script = ExtResource("3_1bvp3")
-penButton = NodePath("Button")
+pen_button = NodePath("Button")
 buttonGroup = ExtResource("4_lquwl")
 
 [node name="Button" type="Button" parent="Panel/HBoxContainer" unique_id=1910227871]
@@ -119,6 +120,10 @@ icon = ExtResource("6_7mycd")
 z_index = -1
 scale = Vector2(0.417, 0.417)
 texture = ExtResource("11_efxa6")
+
+[node name="PvkBackground2" type="Sprite2D" parent="PvkBackground" unique_id=983502445]
+z_index = 3
+texture = ExtResource("12_dg77c")
 
 [connection signal="toggled" from="Panel/HBoxContainer/Button" to="Panel/HBoxContainer" method="pen_selection"]
 [connection signal="toggled" from="Panel/HBoxContainer/addBuilding" to="Panel/HBoxContainer" method="building_selection"]

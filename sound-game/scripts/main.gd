@@ -1,5 +1,6 @@
 extends Node
 
+# Externa referencer till verktyg systemet, punkter för objekt, osv
 @onready var shader_material: ShaderMaterial = $ColorRect.material
 @export var isMenu: bool
 @export var church_points: PackedVector2Array
@@ -7,9 +8,10 @@ extends Node
 @export var pavillion_points: PackedVector2Array
 @onready var HUD: HBoxContainer = $Panel/HBoxContainer
 
+# En mängd konstanter som behövs för att köra och starta simulationen
 const N := [1600, 900]
 const TOTAL := N[0] * N[1]
-const BUF_BYTES := TOTAL * 4 #4 because it is the size of a 32 bit float
+const BUF_BYTES := TOTAL * 4 #4 för att det är storleken av en 32 bit float
 const WORKGROUP_SIZE := 16
 const DRAWING_SCRIPT := preload("res://scripts/drawing.gd")
 const SPEAKER_SCRIPT := preload("res://scripts/speaker.gd")
@@ -17,6 +19,7 @@ const PEN_STROKE_WIDTH := 6.0
 const PEN_HIT_TOLERANCE := 5.0
 const PEN_PHYSICS_THICKNESS := PEN_STROKE_WIDTH + PEN_HIT_TOLERANCE
 
+# Värden relaterade till ljud
 var c_speed := 120.0
 var dx := 1.0
 var dt: float
@@ -30,17 +33,21 @@ var pipeline: RID
 var buffers: Array[RID] = []           
 var uniform_sets: Array[RID] = []   
 var obstacle_buffer: RID
+var psi_x_buffer: RID
+var psi_y_buffer: RID
 var step := 0                       
 var pending_impulses: Array = []    
 const PUSH_CONST_SIZE := 48
 
+# Variabler som hanterar objekt i simulationen
 var drawing_layer: Node2D = null
 var obstacle_mask_data := PackedByteArray()
 var shape_bounds_cache: Dictionary = {}
 var dirty_regions: Array[Rect2i] = []
 
 
-# Sets up the simulation: creates GPU buffers, loads the shader, and prepares everything to run
+# Sätter upp simulationen: skapar GPU buffrar, laddar shader, och förberedar allt
+# som behövs för att köra
 func _ready():
 	Engine.physics_ticks_per_second = 60
 	dt = dx / (c_speed * sqrt(2.0)) * 0.95
@@ -64,6 +71,10 @@ func _ready():
 		buffers.append(rd.storage_buffer_create(BUF_BYTES, zero_data))
 	obstacle_buffer = rd.storage_buffer_create(BUF_BYTES, zero_data)
 
+	# PML auxiliary buffers (psi_x, psi_y)
+	psi_x_buffer = rd.storage_buffer_create(BUF_BYTES, zero_data)
+	psi_y_buffer = rd.storage_buffer_create(BUF_BYTES, zero_data)
+
 	var rotations := [
 		[0, 2, 1],
 		[1, 0, 2],
@@ -82,29 +93,46 @@ func _ready():
 		obstacle_uniform.binding = 3
 		obstacle_uniform.add_id(obstacle_buffer)
 		uniforms.append(obstacle_uniform)
+		
+		var psi_x_uniform := RDUniform.new()
+		psi_x_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+		psi_x_uniform.binding = 4
+		psi_x_uniform.add_id(psi_x_buffer)
+		uniforms.append(psi_x_uniform)
+		
+		var psi_y_uniform := RDUniform.new()
+		psi_y_uniform.uniform_type = RenderingDevice.UNIFORM_TYPE_STORAGE_BUFFER
+		psi_y_uniform.binding = 5
+		psi_y_uniform.add_id(psi_y_buffer)
+		uniforms.append(psi_y_uniform)
 		uniform_sets.append(rd.uniform_set_create(uniforms, shader_rid, 0))
-
+	
+	# Ser till att objekt som inte ska finnas i huvud menyn inte skapas
 	if not isMenu:
 		$ColorRect.mouse_filter = Control.MOUSE_FILTER_IGNORE
 		_spawn_drawing_layer()
 		print("Drawing layer ready")
 		SPEAKER_SCRIPT.spawn_speaker(self, Vector2.ZERO, HUD)
-
+	
 	print("Simulation ready – grid %d×%d  c=%.1f  dt=%.6f  CFL r=%.4f" % [
 		N[0], N[1], c_speed, dt, c_speed * dt / dx])
 	
 	change_rect()
 
+# En funktion som ställer om simulationen till fönstret storlek
 func change_rect():
 	var screen_size_x = get_viewport().get_visible_rect().size.x
 	var scale = screen_size_x / $ColorRect.size.x
-	print(scale)
 	$Camera2D.zoom = Vector2(scale, scale)
 
+
+# Hämtar storleken av simulationen
+# returnerar: Storleken av simulationen
 func get_grid_size() -> Vector2i:
 	return Vector2i(N[0], N[1])
 
-# Runs every physics frame: sends work to the GPU to advance the sound simulation one time step
+
+# Körs varje fysik frame: skickar arbete till GPU för att köra simulationen ett steg
 func _physics_process(_delta):
 	if not dirty_regions.is_empty():
 		_rebuild_obstacle_mask()
@@ -113,6 +141,10 @@ func _physics_process(_delta):
 	var r2 := r * r
 	var dispatch_x := ceili(float(N[0]) / WORKGROUP_SIZE)
 	var dispatch_y := ceili(float(N[1]) / WORKGROUP_SIZE)
+
+	var pml_thickness := 24.0
+	var pml_sigma := 2.0
+	var sigma_dt := pml_sigma * dt
 
 	var compute_list := rd.compute_list_begin()
 	rd.compute_list_bind_compute_pipeline(compute_list, pipeline)
@@ -125,21 +157,33 @@ func _physics_process(_delta):
 		rd.compute_list_add_barrier(compute_list)
 	pending_impulses.clear()
 
-	var packedConstants := _pack_step_constants(N[0], N[1], r2, global_damping)
-	rd.compute_list_set_push_constant(compute_list, packedConstants, PUSH_CONST_SIZE)
+	var packed1 := _pack_step_constants(N[0], N[1], r2, global_damping, 1, pml_thickness, sigma_dt)
+	rd.compute_list_set_push_constant(compute_list, packed1, PUSH_CONST_SIZE)
 	rd.compute_list_dispatch(compute_list, dispatch_x, dispatch_y, 1)
+	rd.compute_list_add_barrier(compute_list)
 
+	var packed2 := _pack_step_constants(N[0], N[1], r2, global_damping, 2, pml_thickness, sigma_dt)
+	rd.compute_list_set_push_constant(compute_list, packed2, PUSH_CONST_SIZE)
+	rd.compute_list_dispatch(compute_list, dispatch_x, dispatch_y, 1)
+	rd.compute_list_add_barrier(compute_list)
+
+	var packed3 := _pack_step_constants(N[0], N[1], r2, global_damping, 3, pml_thickness, sigma_dt)
+	rd.compute_list_set_push_constant(compute_list, packed3, PUSH_CONST_SIZE)
+	rd.compute_list_dispatch(compute_list, dispatch_x, dispatch_y, 1)
+	rd.compute_list_add_barrier(compute_list)
+	
 	rd.compute_list_end()
 	rd.submit()
 	rd.sync()
-
+	
 	step = (step + 1) % 3
-
+	
 	var data := rd.buffer_get_data(buffers[step], 0, BUF_BYTES)
 	var result_img := Image.create_from_data(N[0], N[1], false, Image.FORMAT_RF, data)
 	pressure_texture.update(result_img)
 
-#Adds the drawing layer as a child and connects the script and signal
+
+# Skapar rit lagret som ett barn coh kopplar relevant kod och signaler
 func _spawn_drawing_layer():
 	drawing_layer = Node2D.new()
 	drawing_layer.name = "DrawingLayer"
@@ -153,7 +197,8 @@ func _spawn_drawing_layer():
 	if drawing_layer.has_signal("geometry_changed"):
 		drawing_layer.connect("geometry_changed", Callable(self, "_on_geometry_changed"))
 
-#Queues only changed regions so obstacle updates scale with local edits.
+
+# Köar bara ändrade regionen så objekt uppdaterar skalan med lokala ändringar
 func _on_geometry_changed(change: Dictionary):
 	var change_type: String = str(change.get("type", ""))
 	match change_type:
@@ -176,13 +221,15 @@ func _on_geometry_changed(change: Dictionary):
 		_:
 			dirty_regions.append(Rect2i(0, 0, N[0], N[1]))
 
+
+# Bygger om kollissions masken för simulationen
 func _rebuild_obstacle_mask() -> void:
 	var merged_regions := _merge_dirty_regions(dirty_regions)
 	dirty_regions.clear()
-
+	
 	for region in merged_regions:
 		_clear_region(obstacle_mask_data, region)
-
+	
 	var active_shapes: Array[Node2D] = []
 	for child in drawing_layer.get_children():
 		if child is Polygon2D or child is Line2D:
@@ -191,7 +238,7 @@ func _rebuild_obstacle_mask() -> void:
 			if _is_valid_region(bounds):
 				shape_bounds_cache[shape] = bounds
 				active_shapes.append(shape)
-
+	
 	for region in merged_regions:
 		for shape in active_shapes:
 			var cached_bounds: Rect2i = shape_bounds_cache.get(shape, Rect2i(0, 0, 0, 0))
@@ -201,13 +248,23 @@ func _rebuild_obstacle_mask() -> void:
 				_rasterize_polygon_mask(shape as Polygon2D, obstacle_mask_data)
 			elif shape is Line2D and (shape as Line2D).points.size() > 1:
 				_rasterize_stroke_mask(shape as Line2D, PEN_PHYSICS_THICKNESS, obstacle_mask_data)
-
+	
 	rd.buffer_update(obstacle_buffer, 0, BUF_BYTES, obstacle_mask_data)
 
+
+# Kollar att den givna regionen är godkänd
+# region: Regionen som ska kollas
+# returnerar: Sant som den är valid
 func _is_valid_region(region: Rect2i) -> bool:
 	return region.size.x > 0 and region.size.y > 0
 
 
+# En funktion som säkerställer att simulationen håller sig inom det givna storleken
+# min_x: Minsta möjliga X
+# min_y: Minsta möjliga Y
+# max_x: Största möjliga X
+# max_y: Största möjliga Y
+# returnerar: En region inom de givna X och Y
 func _world_bounds_to_grid_rect(min_x: float, max_x: float, min_y: float, max_y: float) -> Rect2i:
 	var half_width := N[0] * 0.5
 	var half_height := N[1] * 0.5
@@ -215,16 +272,19 @@ func _world_bounds_to_grid_rect(min_x: float, max_x: float, min_y: float, max_y:
 	var grid_x_max := clampi(int(ceil(max_x + half_width)), 0, N[0] - 1)
 	var grid_y_min := clampi(int(floor(min_y + half_height)), 0, N[1] - 1)
 	var grid_y_max := clampi(int(ceil(max_y + half_height)), 0, N[1] - 1)
-
+	
 	return Rect2i(grid_x_min, grid_y_min, grid_x_max - grid_x_min + 1, grid_y_max - grid_y_min + 1)
 
 
+# En funktion som räknar vilka punkter i simulationen som påverkas av det givna objektet
+# shape: Figuren som ska testas
+# returnerar: Regionen som den givna figuren påverkar
 func _compute_shape_grid_bounds(shape: Node2D) -> Rect2i:
 	var min_x := INF
 	var max_x := -INF
 	var min_y := INF
 	var max_y := -INF
-
+	
 	if shape is Polygon2D:
 		if shape.polygon.size() < 3:
 			return Rect2i(0, 0, 0, 0)
@@ -246,10 +306,13 @@ func _compute_shape_grid_bounds(shape: Node2D) -> Rect2i:
 			max_y = max(max_y, world_pt.y + half_thickness)
 	else:
 		return Rect2i(0, 0, 0, 0)
-
+	
 	return _world_bounds_to_grid_rect(min_x, max_x, min_y, max_y)
 
 
+# En funktion som kombinerar dåliga regioner
+# regions: En lista med regioner
+# returnerar: En lista av regioner där vissa rä kombinerade
 func _merge_dirty_regions(regions: Array[Rect2i]) -> Array[Rect2i]:
 	var merged: Array[Rect2i] = []
 	for region in regions:
@@ -266,6 +329,9 @@ func _merge_dirty_regions(regions: Array[Rect2i]) -> Array[Rect2i]:
 	return merged
 
 
+# En funktion som rensar en region
+# mask_data: Data för simulations masken
+# region: Regionen som ska rensas
 func _clear_region(mask_data: PackedByteArray, region: Rect2i) -> void:
 	if not _is_valid_region(region):
 		return
@@ -274,15 +340,19 @@ func _clear_region(mask_data: PackedByteArray, region: Rect2i) -> void:
 			var idx := grid_y * N[0] + grid_x
 			mask_data.encode_u32(idx * 4, 0)
 
-#Helper for building the obstacle mask. Computes the bounding box and then checks wheter all the points inside the bounds are inside the polygon and encodes it as 1=in and 0=out.
+
+# En hjälp funktion för att bygga masken för hinder. Den räknar ut figurens låda och kollar ifall alla
+# punkterna i simulationen är innan för denna låda och sätter de till 1 om de är innanför och 0 annars
+# shape: Figuren som ska hanteras
+# mask_data: Masken som ska ändras
 func _rasterize_polygon_mask(shape: Polygon2D, mask_data: PackedByteArray):
 	var shape_points: PackedVector2Array = []
 	for local_pt in shape.polygon:
 		shape_points.append(shape.to_global(local_pt))
-
+	
 	if shape_points.is_empty():
 		return
-
+	
 	var min_x := INF
 	var max_x := -INF
 	var min_y := INF
@@ -292,7 +362,7 @@ func _rasterize_polygon_mask(shape: Polygon2D, mask_data: PackedByteArray):
 		max_x = max(max_x, p.x)
 		min_y = min(min_y, p.y)
 		max_y = max(max_y, p.y)
-
+	
 	var bounds := _world_bounds_to_grid_rect(min_x, max_x, min_y, max_y)
 	var grid_x_min := bounds.position.x
 	var grid_y_min := bounds.position.y
@@ -301,7 +371,7 @@ func _rasterize_polygon_mask(shape: Polygon2D, mask_data: PackedByteArray):
 	
 	var half_width := N[0] * 0.5
 	var half_height := N[1] * 0.5
-
+	
 	for grid_y in range(grid_y_min, grid_y_max):
 		for grid_x in range(grid_x_min, grid_x_max):
 			var world_p := Vector2(float(grid_x) - half_width, float(grid_y) - half_height)
@@ -310,33 +380,38 @@ func _rasterize_polygon_mask(shape: Polygon2D, mask_data: PackedByteArray):
 				mask_data.encode_u32(idx * 4, 1)
 
 
+# En hjälp funktion för att bygga masken för hinder. Den räknar ut ritningens låda och kollar ifall alla
+# punkterna i simulationen är innan för denna låda och sätter de till 1 om de är innanför och 0 annars
+# stroke: Linjen som ska hanteras
+# width_cells: Tjockleken för linjen
+# mask_data: Masken som ska ändras
 func _rasterize_stroke_mask(stroke: Line2D, width_cells: float, mask_data: PackedByteArray) -> void:
 	var stroke_points: PackedVector2Array = []
 	for local_pt in stroke.points:
 		stroke_points.append(stroke.to_global(local_pt))
-
+	
 	if stroke_points.size() < 2:
 		return
-
+	
 	var half_thickness := maxf(width_cells * 0.5, stroke.width * 0.5)
 	var half_width := N[0] * 0.5
 	var half_height := N[1] * 0.5
-
+	
 	for i in range(stroke_points.size() - 1):
 		var seg_a := stroke_points[i]
 		var seg_b := stroke_points[i + 1]
-
+		
 		var min_x: float = min(seg_a.x, seg_b.x) - half_thickness
 		var max_x: float = max(seg_a.x, seg_b.x) + half_thickness
 		var min_y: float = min(seg_a.y, seg_b.y) - half_thickness
 		var max_y: float = max(seg_a.y, seg_b.y) + half_thickness
-
+		
 		var bounds := _world_bounds_to_grid_rect(min_x, max_x, min_y, max_y)
 		var grid_x_min := bounds.position.x
 		var grid_y_min := bounds.position.y
 		var grid_x_max := bounds.position.x + bounds.size.x
 		var grid_y_max := bounds.position.y + bounds.size.y
-
+		
 		for grid_y in range(grid_y_min, grid_y_max):
 			for grid_x in range(grid_x_min, grid_x_max):
 				var world_p := Vector2(float(grid_x) - half_width, float(grid_y) - half_height)
@@ -346,7 +421,7 @@ func _rasterize_stroke_mask(stroke: Line2D, width_cells: float, mask_data: Packe
 					mask_data.encode_u32(idx * 4, 1)
 
 
-# Packs the shared simulation settings into raw bytes so the GPU shader can read them
+# Packeterar den delade simulations inställningarna i rå bytes så GPU shader kan läsa dem
 func _pack_base_constants(width: int, height: int, r2_val: float, damping: float, mode: int) -> PackedByteArray:
 	var buf := PackedByteArray()
 	buf.resize(PUSH_CONST_SIZE)
@@ -358,12 +433,16 @@ func _pack_base_constants(width: int, height: int, r2_val: float, damping: float
 	return buf
 
 
-# Packs settings for a normal simulation step
-func _pack_step_constants(width: int, height: int, r2_val: float, damping: float) -> PackedByteArray:
-	return _pack_base_constants(width, height, r2_val, damping, 0)
+# Packeterar inställningar för ett normalt simulations steg
+func _pack_step_constants(width: int, height: int, r2_val: float, damping: float, subpass: int = 0, thickness: float = 0.0, sigma_dt: float = 0.0) -> PackedByteArray:
+	var buf := _pack_base_constants(width, height, r2_val, damping, 0)
+	buf.encode_float(36, float(subpass))
+	buf.encode_float(40, thickness)
+	buf.encode_float(44, sigma_dt)
+	return buf
 
 
-# Packs settings for adding a sound impulse at a specific point on the grid
+# Packeterar inställningar för att lägga till en ljud puls vid en specifik punkt på matrisen
 func _pack_impulse_constants(width: int, height: int, r2_val: float, damping: float, ix: int, iy: int, amp: float, sigma: float) -> PackedByteArray:
 	var buf := _pack_base_constants(width, height, r2_val, damping, 1)
 	buf.encode_s32(20, ix)
@@ -373,11 +452,16 @@ func _pack_impulse_constants(width: int, height: int, r2_val: float, damping: fl
 	return buf
 
 
-# Adds a sound pulse to the queue so it gets applied on the next frame
+# Lägger till ett ljud puls i kön som körs nästa frame
+# gx: X-positionen
+# gy: Y-positionen
+# amplitude: Amplituden för vågen
 func _inject_impulse(gx: int, gy: int, amplitude: float = 1.0):
 	pending_impulses.append({"gx": gx, "gy": gy, "amp": amplitude, "sigma": 1.5})
 
 
+# En funktion som hämtar alla högtalare
+# returnerar: Alla existerande högtalare
 func _get_speakers() -> Array[Node]:
 	var speakers: Array[Node] = []
 	for child in get_children():
@@ -386,9 +470,13 @@ func _get_speakers() -> Array[Node]:
 	return speakers
 
 
-# Handles keyboard input: Space creates a sound pulse in the center, R resets the simulation
+# En funktion som hanterar tangentbord knappar: Mellanslag för att skapa en ljud puls
+# R för att starta om simulationen
+# event: Knappen som måste hanteras
 func _unhandled_input(event):
+	# Kollar att vi inte är i huvud menyn
 	if not isMenu:
+		# Hanterar ifall mellanslag trycktes
 		if event is InputEventKey and event.pressed and event.keycode == KEY_SPACE:
 			var speakers := _get_speakers()
 			if not speakers.is_empty():
@@ -397,7 +485,8 @@ func _unhandled_input(event):
 			else:
 				push_warning("Missing speaker (!!!!!?)")
 			print("Sound")
-
+		
+		# Hanterar ifall R knappen trycktes
 		if event is InputEventKey and event.pressed and event.keycode == KEY_R:
 			var zero_data := PackedByteArray()
 			zero_data.resize(BUF_BYTES)
@@ -406,14 +495,15 @@ func _unhandled_input(event):
 				rd.buffer_update(buf_rid, 0, BUF_BYTES, zero_data)
 			step = 0
 			print("Reset")
-
+		
+		# Hanterar ifall C knappen trycktes
 		if event is InputEventKey and event.pressed and event.keycode == KEY_C:
 			if drawing_layer and drawing_layer.has_method("clear_shapes"):
 				drawing_layer.clear_shapes()
 				print("Shapes cleared")
 
 
-# Cleans up all GPU resourcese
+# Rensar alla GPU resurser
 func _exit_tree():
 	if rd:
 		for us in uniform_sets:

@@ -3,8 +3,9 @@
 [ext_resource type="Script" uid="uid://bvgirqmcvyb7y" path="res://scripts/start_menu.gd" id="1_ots34"]
 [ext_resource type="PackedScene" uid="uid://dmukdcbojkio5" path="res://main.tscn" id="2_qn1rc"]
 [ext_resource type="Shader" uid="uid://b38pbiscekded" path="res://main.gdshader" id="3_1n0d2"]
-[ext_resource type="Script" uid="uid://bt17ah4qrcvf" path="res://scripts/main.gd" id="3_y5hus"]
+[ext_resource type="Script" uid="uid://btg4k3ien5hdf" path="res://scripts/main.gd" id="3_y5hus"]
 [ext_resource type="Texture2D" uid="uid://dct8o8b4hxvck" path="res://drawings/PVK_Background.png" id="5_oiuna"]
+[ext_resource type="Texture2D" uid="uid://b3h4vwpbuep6u" path="res://drawings/PVK_Size_Thingy.png" id="6_4a3qj"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_y5hus"]
 shader = ExtResource("3_1n0d2")
@@ -55,6 +56,9 @@ zoom = Vector2(0.72, 0.72)
 [node name="PvkBackground" type="Sprite2D" parent="." unique_id=485426892]
 scale = Vector2(0.417, 0.417)
 texture = ExtResource("5_oiuna")
+
+[node name="PvkBackground2" type="Sprite2D" parent="PvkBackground" unique_id=2043036728]
+texture = ExtResource("6_4a3qj")
 
 [connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button" to="." method="start_game"]
 [connection signal="pressed" from="Node/ColorRect/VBoxContainer/Button2" to="." method="quit_game"]
